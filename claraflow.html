@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClaraFlow - Claramente</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .onboarding-screen {
+            display: none;
+            text-align: center;
+        }
+        .onboarding-screen.active {
+            display: block;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .progress {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: background 0.3s;
+        }
+        .progress-dot.active {
+            background: #667eea;
+        }
+        .main-app {
+            display: none;
+        }
+        .main-app.active {
+            display: block;
+        }
+        .workflow-section {
+            margin-bottom: 30px;
+        }
+        .decision-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Onboarding Screen 1 -->
+        <div class="onboarding-screen active" id="screen1">
+            <div class="progress">
+                <div class="progress-dot active"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+            </div>
+            <h1>¡Bienvenido a ClaraFlow! 🎯</h1>
+            <p>ClaraFlow te ayuda a tomar decisiones claras y organizadas mediante un sistema inteligente de flujo de trabajo.</p>
+            <button onclick="nextScreen(2)">Continuar</button>
+        </div>
+
+        <!-- Onboarding Screen 2 -->
+        <div class="onboarding-screen" id="screen2">
+            <div class="progress">
+                <div class="progress-dot active"></div>
+                <div class="progress-dot active"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+            </div>
+            <h1>¿Cómo funciona? 🤔</h1>
+            <p>1. Crea una sesión de trabajo<br>2. Define tu decisión<br>3. Sigue el flujo guiado<br>4. Obtén claridad en tus decisiones</p>
+            <button onclick="nextScreen(3)">Siguiente</button>
+        </div>
+
+        <!-- Onboarding Screen 3 -->
+        <div class="onboarding-screen" id="screen3">
+            <div class="progress">
+                <div class="progress-dot active"></div>
+                <div class="progress-dot active"></div>
+                <div class="progress-dot active"></div>
+                <div class="progress-dot"></div>
+            </div>
+            <h1>Tu privacidad importa 🔒</h1>
+            <p>Todas tus decisiones se guardan de forma segura. Solo tú tienes acceso a tu información.</p>
+            <button onclick="nextScreen(4)">Entendido</button>
+        </div>
+
+        <!-- Onboarding Screen 4 -->
+        <div class="onboarding-screen" id="screen4">
+            <div class="progress">
+                <div class="progress-dot active"></div>
+                <div class="progress-dot active"></div>
+                <div class="progress-dot active"></div>
+                <div class="progress-dot active"></div>
+            </div>
+            <h1>¡Listo para empezar! 🚀</h1>
+            <p>Vamos a comenzar tu primera sesión de ClaraFlow.</p>
+            <button onclick="completeOnboarding()">Comenzar</button>
+        </div>
+
+        <!-- Main Application -->
+        <div class="main-app" id="mainApp">
+            <h1>ClaraFlow Dashboard</h1>
+            
+            <div class="workflow-section">
+                <h2>Crear Nueva Sesión</h2>
+                <button id="createSession" onclick="createSession()">Iniciar Sesión de Trabajo</button>
+                <div id="sessionStatus"></div>
+            </div>
+
+            <div class="workflow-section">
+                <h2>Registrar Decisión</h2>
+                <button id="makeDecision" onclick="makeDecision()" disabled>Registrar Decisión</button>
+                <div id="decisionStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const SUPABASE_URL = 'https://dkjepsqgqtjmibxgaiys.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRramVwc3FncXRqbWlieGdhaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NTQ0NTUsImV4cCI6MjA1MDUzMDQ1NX0.CI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRramVwc3FncXRqbWlieGdhaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NTQ0NTUsImV4cCI6MjA1MDUzMDQ1NX0';
+        const DECIDE_URL = 'https://claramente-edge-functions.vercel.app/api/claraflow-decide';
+        const SESSION_URL = 'https://claramente-edge-functions.vercel.app/api/claraflow-session';
+
+        // Check onboarding status
+        const hasCompletedOnboarding = localStorage.getItem('claraflow_onboarding_complete');
+        if (hasCompletedOnboarding === 'true') {
+            document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('mainApp').classList.add('active');
+        }
+
+        let currentSessionId = null;
+
+        function nextScreen(screenNumber) {
+            document.querySelectorAll('.onboarding-screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('screen' + screenNumber).classList.add('active');
+        }
+
+        function completeOnboarding() {
+            localStorage.setItem('claraflow_onboarding_complete', 'true');
+            document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('mainApp').classList.add('active');
+        }
+
+        async function createSession() {
+            const button = document.getElementById('createSession');
+            const status = document.getElementById('sessionStatus');
+            
+            button.disabled = true;
+            status.innerHTML = '<p>Creando sesión...</p>';
+
+            try {
+                const response = await fetch(SESSION_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        user_id: 'demo-user-' + Date.now(),
+                        session_type: 'claraflow'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentSessionId = data.session_id || data.id;
+                    status.innerHTML = '<p style="color: green;">✅ Sesión creada exitosamente!</p>';
+                    document.getElementById('makeDecision').disabled = false;
+                } else {
+                    const error = await response.text();
+                    status.innerHTML = `<p class="error">❌ Error: ${error}</p>`;
+                    button.disabled = false;
+                }
+            } catch (error) {
+                status.innerHTML = `<p class="error">❌ Error de conexión: ${error.message}</p>`;
+                button.disabled = false;
+            }
+        }
+
+        async function makeDecision() {
+            const button = document.getElementById('makeDecision');
+            const status = document.getElementById('decisionStatus');
+            
+            if (!currentSessionId) {
+                status.innerHTML = '<p class="error">❌ Primero debes crear una sesión</p>';
+                return;
+            }
+
+            button.disabled = true;
+            status.innerHTML = '<p>Registrando decisión...</p>';
+
+            try {
+                const response = await fetch(DECIDE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        session_id: currentSessionId,
+                        decision_text: 'Decisión de prueba ClaraFlow',
+                        context: { source: 'web_ui' }
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
+                } else {
+                    const error = await response.text();
+                    status.innerHTML = `<p class="error">❌ Error: ${error}</p>`;
+                }
+                button.disabled = false;
+            } catch (error) {
+                status.innerHTML = `<p class="error">❌ Error de conexión: ${error.message}</p>`;
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
