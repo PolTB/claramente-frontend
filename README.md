@@ -9,3 +9,4 @@ Frontend para la aplicación ClaraFlow de ClaraMente.
 - ## Deployment
 - - Trigger Vercel deployment
   -   - Deploy con fix endpoint correcto
+      -   - Webhook GitHub conectado
