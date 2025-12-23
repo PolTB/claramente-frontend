@@ -27,6 +27,15 @@
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
+
+                .onboarding-card {
+                                background: white;
+                                border-radius: 16px;
+                                padding: 48px;
+                                max-width: 720px;
+                                margin: 48px auto;
+                                box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+                            }
         .onboarding-screen {
             display: none;
             text-align: center;
@@ -34,6 +43,11 @@
         .onboarding-screen.active {
             display: block;
         }
+
+                .onboarding-screen h1,
+                .onboarding-screen p {
+                                color: #111827 !important;
+                            }
         h1 {
             color: #333;
             margin-bottom: 20px;
@@ -133,6 +147,7 @@
     
 
             <!-- Onboarding Screen 1 -->
+                <div class="onboarding-card">
         <div class="onboarding-screen active" id="screen1">
             <div class="progress">
                 <div class="progress-dot active"></div>
@@ -141,7 +156,7 @@
             </div>
             <h1>¡Bienvenido a ClaraFlow! 🎯</h1>
             <p>ClaraFlow te ayuda a tomar decisiones claras y organizadas mediante un sistema inteligente de flujo de trabajo.</p>
-            <button onclick="nextScreen(2)">Continuar</button>
+            <button type="button" onclick="nextScreen(2)">Continuar</button>
         </div>
 
         <!-- Onboarding Screen 2 -->
@@ -154,7 +169,7 @@
             </div>
             <h1>¿Cómo funciona? 🤔</h1>
             <p>1. Crea una sesión de trabajo<br>2. Define tu decisión<br>3. Sigue el flujo guiado<br>4. Obtén claridad en tus decisiones</p>
-            <button onclick="nextScreen(3)">Siguiente</button>
+            <button type="button" onclick="nextScreen(3)">Siguiente</button>
         </div>
 
         <!-- Onboarding Screen 3 -->
@@ -167,7 +182,7 @@
             </div>
             <h1>Tu privacidad importa 🔒</h1>
             <p>Todas tus decisiones se guardan de forma segura. Solo tú tienes acceso a tu información.</p>
-            <button onclick="nextScreen(4)">Entendido</button>
+            <button type="button" onclick="nextScreen(4)">Entendido</button>
         </div>
 
         <!-- Onboarding Screen 4 -->
@@ -180,8 +195,9 @@
             </div>
             <h1>¡Listo para empezar! 🚀</h1>
             <p>Vamos a comenzar tu primera sesión de ClaraFlow.</p>
-            <button onclick="completeOnboarding()">Comenzar</button>
+            <button type="button" onclick="completeOnboarding()">Comenzar</button>
         </div>
+                                </div>
 
         <!-- Main Application -->
         <div class="main-app" id="mainApp">
