@@ -118,6 +118,19 @@
 </head>
 <body>
     <div class="container">
+
+                /* IF Loop Styles */
+        #ifContainer { max-width: 720px; margin: 0 auto; padding: 16px; }
+        .if-chat { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+        .if-bubble { padding: 12px 14px; border-radius: 12px; line-height: 1.35; white-space: pre-wrap; }
+        .if-assistant { background: #f3f4f6; align-self: flex-start; }
+        .if-user { background: #111827; color: white; align-self: flex-end; }
+        .if-input-row { display: flex; gap: 10px; margin-top: 8px; }
+        .if-input { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; }
+        .if-send { padding: 12px 14px; border-radius: 10px; border: 0; background: #111827; color: white; cursor: pointer; }
+        .if-send[disabled] { opacity: 0.6; cursor: not-allowed; }
+        .if-status { font-size: 14px; opacity: 0.8; margin-top: 6px; }
+        .if-error { margin-top: 10px; font-size: 14px; color: #b91c1c; }
         <!-- Onboarding Screen 1 -->
         <div class="onboarding-screen active" id="screen1">
             <div class="progress">
@@ -179,6 +192,17 @@
             <p style="color: #666; font-size: 16px;">Estamos configurando tu sesión de decisión guiada</p>
         </div>
 
+                    <!-- IF Loop Container -->
+        <div id="ifContainer" style="display:none;">
+            <div id="ifChat" class="if-chat"></div>
+            <div id="ifStatus" class="if-status" style="display:none;">Procesando...</div>
+            <div class="if-input-row">
+                <input id="ifInput" type="text" class="if-input" placeholder="Escribe aquí..." autocomplete="off"/>
+                <button id="ifSendBtn" class="if-send">Enviar</button>
+            </div>
+            <div id="ifError" class="if-error" style="display:none;"></div>
+        </div>
+
         <!-- Dashboard original (oculto inicialmente) -->
         <div id="dashboardContent">
             <h1>ClaraFlow Dashboard</h1>
@@ -208,6 +232,7 @@
         // Check onboarding status
         const hasCompletedOnboarding = localStorage.getItem('claraflow_onboarding_complete');
         if (hasCompletedOnboarding === 'true') {
+                    const IF_URL = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
             document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.remove('active'));
             document.getElementById('mainApp').classList.add('active');
         }
@@ -251,28 +276,11 @@
                 if (response.ok) {
                     const data = await response.json();
                     currentSessionId = data.session_id || data.id;
-                                    // Ocultar el dashboard y mostrar el placeholder
-                document.getElementById('dashboardContent').style.display = 'none';
-                document.getElementById('sessionPlaceholder').style.display = 'block';
 
-                        // Timeout para ocultar el placeholder después de 6 segundos
-                                    setTimeout(() => {
-                                                            document.getElementById('sessionPlaceholder').style.display = 'none';
-                                                            document.getElementById('dashboardContent').style.display = 'block';
-
-                                                            // Emitir evento de analytics
-                                                            if (typeof gtag !== 'undefined') {
-                                                                                        gtag('event', 'placeholder_timeout_shown', {
-                                                                                                                        'event_category': 'user_experience',
-                                                                                                                        'event_label': 'session_placeholder_timeout'
-                                                                                                                    });
-                                                                                    }
-                                                        }, 6000); // 6 segundos
-                } else {
-                    const error = await response.text();
-                    status.innerHTML = `<p class="error">❌ Error: ${error}</p>`;
-                    button.disabled = false;
-                }
+                // Show IF Loop and initialize handlers
+                showIF();
+                appendIFMessage('assistant', 'Cuando quieras, cuéntame qué está pasando por tu mente hoy.');
+                                    initIFHandlers();
             } catch (error) {
                 status.innerHTML = `<p class="error">❌ Error de conexión: ${error.message}</p>`;
                 button.disabled = false;
@@ -318,6 +326,87 @@
                 status.innerHTML = `<p class="error">❌ Error de conexión: ${error.message}</p>`;
                 button.disabled = false;
             }
+        }
+
+                // IF Loop Functions
+        let currentUserId = 'demo-user-' + Date.now();
+        
+        function showIF() {
+            const ph = document.getElementById('sessionPlaceholder');
+            const ifC = document.getElementById('ifContainer');
+            if (ph) ph.style.display = 'none';
+            if (ifC) ifC.style.display = 'block';
+        }
+        
+        function appendIFMessage(role, text) {
+            const chat = document.getElementById('ifChat');
+            if (!chat) return;
+            const bubble = document.createElement('div');
+            bubble.className = `if-bubble ${role === 'assistant' ? 'if-assistant' : 'if-user'}`;
+            bubble.textContent = text;
+            chat.appendChild(bubble);
+            bubble.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+        
+        function setIFProcessing(isProcessing) {
+            const status = document.getElementById('ifStatus');
+            const btn = document.getElementById('ifSendBtn');
+            const input = document.getElementById('ifInput');
+            if (status) status.style.display = isProcessing ? 'block' : 'none';
+            if (btn) btn.disabled = isProcessing;
+            if (input) input.disabled = isProcessing;
+        }
+        
+        function setIFError(msg) {
+            const el = document.getElementById('ifError');
+            if (!el) return;
+            if (!msg) { el.style.display = 'none'; el.textContent = ''; }
+            else { el.style.display = 'block'; el.textContent = msg; }
+        }
+        
+        async function sendIFMessage(userId, sessionId, text) {
+            const payload = { user_id: userId, session_id: String(sessionId || 'demo'), text };
+            const res = await fetch(IF_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json().catch(() => null);
+            if (!res.ok || !data?.ok) {
+                const err = data?.error || `HTTP_${res.status}`;
+                throw new Error(err);
+            }
+            return data.reply;
+        }
+        
+        function initIFHandlers() {
+            const btn = document.getElementById('ifSendBtn');
+            const input = document.getElementById('ifInput');
+            
+            async function onSend() {
+                const text = (input?.value || '').trim();
+                if (!text) return;
+                
+                setIFError('');
+                appendIFMessage('user', text);
+                if (input) input.value = '';
+                setIFProcessing(true);
+                
+                try {
+                    const reply = await sendIFMessage(currentUserId, currentSessionId, text);
+                    appendIFMessage('assistant', reply);
+                } catch (e) {
+                    setIFError('No hemos podido responder ahora. Reintenta.');
+                } finally {
+                    setIFProcessing(false);
+                    input?.focus();
+                }
+            }
+            
+            btn?.addEventListener('click', onSend);
+            input?.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter') onSend();
+            });
         }
     </script>
 </body>
