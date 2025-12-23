@@ -254,6 +254,20 @@
                                     // Ocultar el dashboard y mostrar el placeholder
                 document.getElementById('dashboardContent').style.display = 'none';
                 document.getElementById('sessionPlaceholder').style.display = 'block';
+
+                        // Timeout para ocultar el placeholder después de 6 segundos
+                                    setTimeout(() => {
+                                                            document.getElementById('sessionPlaceholder').style.display = 'none';
+                                                            document.getElementById('dashboardContent').style.display = 'block';
+
+                                                            // Emitir evento de analytics
+                                                            if (typeof gtag !== 'undefined') {
+                                                                                        gtag('event', 'placeholder_timeout_shown', {
+                                                                                                                        'event_category': 'user_experience',
+                                                                                                                        'event_label': 'session_placeholder_timeout'
+                                                                                                                    });
+                                                                                    }
+                                                        }, 6000); // 6 segundos
                 } else {
                     const error = await response.text();
                     status.innerHTML = `<p class="error">❌ Error: ${error}</p>`;
