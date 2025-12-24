@@ -156,7 +156,7 @@
             </div>
             <h1>¡Bienvenido a ClaraFlow! 🎯</h1>
             <p>ClaraFlow te ayuda a tomar decisiones claras y organizadas mediante un sistema inteligente de flujo de trabajo.</p>
-            <button type="button" onclick="nextScreen(2)">Continuar</button>
+            <button type="button" id="btn-continuar"Continuar</button>
         </div>
 
         <!-- Onboarding Screen 2 -->
@@ -169,7 +169,7 @@
             </div>
             <h1>¿Cómo funciona? 🤔</h1>
             <p>1. Crea una sesión de trabajo<br>2. Define tu decisión<br>3. Sigue el flujo guiado<br>4. Obtén claridad en tus decisiones</p>
-            <button type="button" onclick="nextScreen(3)">Siguiente</button>
+            <button type="button" id="btn-siguiente"Siguiente</button>
         </div>
 
         <!-- Onboarding Screen 3 -->
@@ -182,7 +182,7 @@
             </div>
             <h1>Tu privacidad importa 🔒</h1>
             <p>Todas tus decisiones se guardan de forma segura. Solo tú tienes acceso a tu información.</p>
-            <button type="button" onclick="nextScreen(4)">Entendido</button>
+            <button type="button" id="btn-entendido"Entendido</button>
         </div>
 
         <!-- Onboarding Screen 4 -->
@@ -195,9 +195,7 @@
             </div>
             <h1>¡Listo para empezar! 🚀</h1>
             <p>Vamos a comenzar tu primera sesión de ClaraFlow.</p>
-            <button type="button" onclick="completeOnboarding()">Comenzar</button>
-        </div>
-                                </div>
+            <button type="button"  id="btn-comenzar">Comenzar</button>
 
         <!-- Main Application -->
         <div class="main-app" id="mainApp">
@@ -424,6 +422,23 @@
                 if (ev.key === 'Enter') onSend();
             });
         }
+
+            // Onboarding navigation event listeners
+            document.addEventListener('DOMContentLoaded', () => {
+                        const bind = (id, handler) => {
+                                        const el = document.getElementById(id);
+                                        if (!el) return;
+                                        el.addEventListener('click', (e) => {
+                                                            e.preventDefault();
+                                                            handler();
+                                                        });
+                                    };
+
+                        bind('btn-continuar', () => nextScreen(2));
+                        bind('btn-siguiente', () => nextScreen(3));
+                        bind('btn-entendido', () => nextScreen(4));
+                        bind('btn-comenzar', () => completeOnboarding());
+                
     </script>
 </body>
 </html>
