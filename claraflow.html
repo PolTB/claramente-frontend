@@ -423,22 +423,6 @@
             });
         }
 
-            // Onboarding navigation event listeners
-            document.addEventListener('DOMContentLoaded', () => {
-                        const bind = (id, handler) => {
-                                        const el = document.getElementById(id);
-                                        if (!el) return;
-                                        el.addEventListener('click', (e) => {
-                                                            e.preventDefault();
-                                                            handler();
-                                                        });
-                                    };
-
-                        bind('btn-continuar', () => nextScreen(2));
-                        bind('btn-siguiente', () => nextScreen(3));
-                        bind('btn-entendido', () => nextScreen(4));
-                        bind('btn-comenzar', () => completeOnboarding());
-                
     </script>
 </body>
 </html>
