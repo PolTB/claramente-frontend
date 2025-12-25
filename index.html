@@ -156,7 +156,7 @@
             </div>
             <h1>¡Bienvenido a ClaraFlow! 🎯</h1>
             <p>ClaraFlow te ayuda a tomar decisiones claras y organizadas mediante un sistema inteligente de flujo de trabajo.</p>
-                        <button type="button" id="btn-continuar" onclick="nextScreen(2)">Continuar</button>
+                        <button type="button" id="btn-continuar">Continuar</button>
         </div>
 
         <!-- Onboarding Screen 2 -->
@@ -426,6 +426,19 @@
     </script>
 </body>
 </html>
+
+    // Event delegation for buttons (CTO fix)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      
+      const txt = (btn.textContent || '').trim().toLowerCase();
+      
+      if (txt === 'continuar') nextScreen(2);
+      else if (txt === 'siguiente') nextScreen(3);
+      else if (txt === 'entendido') nextScreen(4);
+      else if (txt === 'comenzar') finishOnboarding();
+    });
 
 <!-- Fix button onclick - force new deployment -->
 <!-- Force redeploy -->
