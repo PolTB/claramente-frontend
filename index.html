@@ -242,12 +242,12 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRramVwc3FncXRqbWlieGdhaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30.YH0RfmwXc3FncXRQqbHlidGdhX1zI1wicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30';
         const DECIDE_URL = 'https://claramente-edge-prod.vercel.app/api/claraflow-decide';
         const SESSION_URL = 'https://claramente-edge-prod.vercel.app/api/clara-flow-session';
+                const IF_URL = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
 
         // Check onboarding status
         const hasCompletedOnboarding = localStorage.getItem('claraflow_onboarding_complete');
         if (hasCompletedOnboarding === 'true') {
-                    const IF_URL = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
-            document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.remove('active'));
+                                document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.remove('active'));
             document.getElementById('mainApp').classList.add('active');
         }
 
@@ -423,29 +423,33 @@
             });
         }
 
-        // Event delegation for buttons (CTO fix)
+    // Event delegation for buttons (Continuar/Siguiente/Entendido/Comenzar)
     document.addEventListener('click', (e) => {
-      const btn = e.target.closest('button');
-      if (!btn) return;
-        // Event delegation for buttons (CTO fix - SOLUTION)
-  document.addEventListener('click', (e) => {
-    // Si e.target no es un elemento (por ejemplo, es un TextNode), tomar su padre
-    let targetElem = e.target;
-    if (targetElem.nodeType !== Node.ELEMENT_NODE) {
-      targetElem = targetElem.parentElement; // subir al elemento padre si existe
-    }
-    
-    const btn = targetElem ? targetElem.closest('button') : null;
-    if (!btn) return;
-    
-    const txt = (btn.textContent || '').trim().toLowerCase();
-    
-    if (txt === 'continuar') nextScreen(2);
-    else if (txt === 'siguiente') nextScreen(3);
-    else if (txt === 'entendido') nextScreen(4);
-    else if (txt === 'comenzar') completeOnboarding();
-  });
-</html>
+        let targetElem = e.target;
+        
+        // Si click en TextNode, subir al parentElement
+        if (targetElem.nodeType === Node.TEXT_NODE) {
+            targetElem = targetElem.parentElement;
+        }
+        
+        const btn = targetElem.closest('button');
+        if (!btn) return;
+        
+        // Evitar clicks de un elemento dentro del botón (e.g., si el texto está en span)
+        if (btn.contains(e.target) || btn === e.target) {
+            const txt = (btn.textContent || '').trim().toLowerCase();
+            
+            if (txt === 'continuar') nextScreen(2);
+            else if (txt === 'siguiente') nextScreen(3);
+            else if (txt === 'entendido') nextScreen(4);
+            else if (txt === 'comenzar') completeOnboarding();
+        }
+    });
+
+    input?.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') onSend();
+    });
+});</html>
 
     
 <!-- Fix button onclick - force new deployment -->
