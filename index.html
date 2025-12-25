@@ -422,28 +422,63 @@
             });
         }
 
-            // Event delegation for buttons (Continuar/Siguiente/Entendido/Comenzar)
-    document.addEventListener('click', (e) => {
-        let targetElem = e.target;
-        
-        // Si click en TextNode, subir al parentElement
-        if (targetElem.nodeType === Node.TEXT_NODE) {
-            targetElem = targetElem.parentElement;
-        }
-        
-        const btn = targetElem.closest('button');
-        if (!btn) return;
-        
-        // Evitar clicks de un elemento dentro del botón (e.g., si el texto está en span)
-        if (btn.contains(e.target) || btn === e.target) {
-            const txt = (btn.textContent || '').trim().toLowerCase();
+            // Direct event listeners for onboarding buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado - Inicializando event listeners...');
             
-            if (txt === 'continuar') nextScreen(2);
-            else if (txt === 'siguiente') nextScreen(3);
-            else if (txt === 'entendido') nextScreen(4);
-            else if (txt === 'comenzar') completeOnboarding();
-        }
-}
+            // Check onboarding status
+            const hasCompletedOnboarding = localStorage.getItem('claraflow_onboarding_complete');
+            if (hasCompletedOnboarding === 'true') {
+                document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.remove('active'));
+                document.getElementById('mainApp').classList.add('active');
+            }
+            
+            // Event listeners para botones de onboarding
+            const btnContinuar = document.getElementById('btn-continuar');
+            const btnSiguiente = document.getElementById('btn-siguiente');
+            const btnEntendido = document.getElementById('btn-entendido');
+            const btnComenzar = document.getElementById('btn-comenzar');
+            
+            if (btnContinuar) {
+                btnContinuar.addEventListener('click', function() {
+                    console.log('Click en Continuar');
+                    nextScreen(2);
+                });
+            }
+            
+            if (btnSiguiente) {
+                btnSiguiente.addEventListener('click', function() {
+                    console.log('Click en Siguiente');
+                    nextScreen(3);
+                });
+            }
+            
+            if (btnEntendido) {
+                btnEntendido.addEventListener('click', function() {
+                    console.log('Click en Entendido');
+                    nextScreen(4);
+                });
+            }
+            
+            if (btnComenzar) {
+                btnComenzar.addEventListener('click', function() {
+                    console.log('Click en Comenzar');
+                    completeOnboarding();
+                });
+            }
+            
+            // Event listeners para dashboard
+            const createSessionBtn = document.getElementById('createSession');
+            const makeDecisionBtn = document.getElementById('makeDecision');
+            
+            if (createSessionBtn) {
+                createSessionBtn.addEventListener('click', createSession);
+            }
+            
+            if (makeDecisionBtn) {
+                makeDecisionBtn.addEventListener('click', makeDecision);
+            }
+        });
 
 
 });</html>
