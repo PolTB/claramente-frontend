@@ -427,18 +427,24 @@
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
-      
-      const txt = (btn.textContent || '').trim().toLowerCase();
-      
-      if (txt === 'continuar') nextScreen(2);
-      else if (txt === 'siguiente') nextScreen(3);
-      else if (txt === 'entendido') nextScreen(4);
-      else if (txt === 'comenzar') completeOnboarding();
-    });
-
-
-    </script>
-</body>
+        // Event delegation for buttons (CTO fix - SOLUTION)
+  document.addEventListener('click', (e) => {
+    // Si e.target no es un elemento (por ejemplo, es un TextNode), tomar su padre
+    let targetElem = e.target;
+    if (targetElem.nodeType !== Node.ELEMENT_NODE) {
+      targetElem = targetElem.parentElement; // subir al elemento padre si existe
+    }
+    
+    const btn = targetElem ? targetElem.closest('button') : null;
+    if (!btn) return;
+    
+    const txt = (btn.textContent || '').trim().toLowerCase();
+    
+    if (txt === 'continuar') nextScreen(2);
+    else if (txt === 'siguiente') nextScreen(3);
+    else if (txt === 'entendido') nextScreen(4);
+    else if (txt === 'comenzar') completeOnboarding();
+  });
 </html>
 
     
