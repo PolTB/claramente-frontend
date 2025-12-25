@@ -423,11 +423,7 @@
             });
         }
 
-    </script>
-</body>
-</html>
-
-    // Event delegation for buttons (CTO fix)
+        // Event delegation for buttons (CTO fix)
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
@@ -440,5 +436,11 @@
       else if (txt === 'comenzar') finishOnboarding();
     });
 
+
+    </script>
+</body>
+</html>
+
+    
 <!-- Fix button onclick - force new deployment -->
 <!-- Force redeploy -->
