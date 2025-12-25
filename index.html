@@ -423,7 +423,7 @@
             });
         }
 
-    // Event delegation for buttons (Continuar/Siguiente/Entendido/Comenzar)
+            // Event delegation for buttons (Continuar/Siguiente/Entendido/Comenzar)
     document.addEventListener('click', (e) => {
         let targetElem = e.target;
         
@@ -444,7 +444,8 @@
             else if (txt === 'entendido') nextScreen(4);
             else if (txt === 'comenzar') completeOnboarding();
         }
-    });
+}
+
 
 });</html>
 
