@@ -157,7 +157,8 @@
             </div>
             <h1>¡Bienvenido a ClaraFlow! 🎯</h1>
             <p>ClaraFlow te ayuda a tomar decisiones claras y organizadas mediante un sistema inteligente de flujo de trabajo.</p>
-                        <button type="button" id="btn-continuar" onclick="nextScreen(2)">Continuar</button>        </div>
+                        <button type="button" id="btn-continuar"185
+                                >Continuar</button>        </div>
 
         <!-- Onboarding Screen 2 -->
         <div class="onboarding-screen" id="screen2">
@@ -169,7 +170,7 @@
             </div>
             <h1>¿Cómo funciona? 🤔</h1>
             <p>1. Crea una sesión de trabajo<br>2. Define tu decisión<br>3. Sigue el flujo guiado<br>4. Obtén claridad en tus decisiones</p>
-            <button type="button" id="btn-siguiente" onclick="nextScreen(3)">Siguiente</button>
+            <button type="button" id="btn-siguiente">Siguiente</button>
         </div>
 
         <!-- Onboarding Screen 3 -->
@@ -182,7 +183,8 @@
             </div>
             <h1>Tu privacidad importa 🔒</h1>
             <p>Todas tus decisiones se guardan de forma segura. Solo tú tienes acceso a tu información.</p>
-            <button type="button" id="btn-entendido" onclick="nextScreen(4)">Entendido</button>
+            <button type="button" id="btn-entendido" 160
+                    "nextScreen(4)">Entendido</button>
         </div>
 
         <!-- Onboarding Screen 4 -->
@@ -195,7 +197,7 @@
             </div>
             <h1>¡Listo para empezar! 🚀</h1>
             <p>Vamos a comenzar tu primera sesión de ClaraFlow.</p>
-            <button type="button" id="btn-comenzar" onclick="completeOnboarding()">Comenzar</button>
+            <button type="button" id="btn-comenzar">Comenzar</button>
 
         <!-- Main Application -->
         <div class="main-app" id="mainApp">
@@ -223,13 +225,13 @@
             
             <div class="workflow-section">
                 <h2>Crear Nueva Sesión</h2>
-                <button id="createSession" onclick="createSession()">Iniciar Sesión de Trabajo</button>
+                <button id="createSession">Iniciar Sesión de Trabajo</button>
                 <div id="sessionStatus"></div>
             </div>
 
             <div class="workflow-section">
                 <h2>Registrar Decisión</h2>
-                <button id="makeDecision" onclick="makeDecision()" disabled>Registrar Decisión</button>
+                <button id="makeDecision" disabled>Registrar Decisión</button>
                 <div id="decisionStatus"></div>
             </div>
                     </div> <!-- Cierre dashboardContent -->
@@ -424,7 +426,8 @@
         }
 
             // Direct event listeners for onboarding buttons
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('429
+                                  ', function() {
             console.log('DOM cargado - Inicializando event listeners...');
             
             // Check onboarding status
