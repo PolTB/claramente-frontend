@@ -248,13 +248,6 @@
         const SESSION_URL = 'https://claramente-edge-prod.vercel.app/api/clara-flow-session';
                 const IF_URL = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
 
-        // Check onboarding status
-        const hasCompletedOnboarding = localStorage.getItem('claraflow_onboarding_complete');
-        if (hasCompletedOnboarding === 'true') {
-                                document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('mainApp').classList.add('active');
-        }
-
         let currentSessionId = null;
 
         function nextScreen(screenNumber) {
@@ -486,10 +479,12 @@
         });
 
 
-});</html>
-
+</script>
     
 <!-- Fix button onclick - force new deployment -->
 <!-- Force redeploy -->
     <!-- Trigger Vercel deployment -->
             <!-- Force cache invalidation - T17 fix verification -->
+
+                            </body>
+                            </html>
