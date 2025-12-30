@@ -371,14 +371,27 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                console.log('🔍 Backend response completa:', data);
-                currentSessionId = data.session_id || data.id || data.sessionId || data.data?.session_id || data.data?.id;
-                console.log('✅ Session ID extraído:', currentSessionId);                    status.innerHTML = '<p style="color: green;">✅ Sesión creada con ID: ' + currentSessionId + '</p>';
-                    document.getElementById('makeDecision').disabled = false;
                     
-                    showIF();
-                    appendIFMessage('assistant', 'Cuando quieras, cuéntame qué está pasando por tu mente hoy.');
-                    initIFHandlers();
+                    // 🔍 DEBUG: Ver qué devuelve el backend
+                    console.log('📦 Respuesta completa del backend:', data);
+                    console.log('🔑 Claves disponibles:', Object.keys(data));
+                    
+                    // Intentar múltiples campos posibles
+                    currentSessionId = data.session_id || data.id || data.sessionId || data.data?.session_id || data.data?.id;
+                    
+                    console.log('✅ Session ID extraído:', currentSessionId);
+                    
+                    if (currentSessionId) {
+                        status.innerHTML = '<p style="color: green;">✅ Sesión creada con ID: ' + currentSessionId + '</p>';
+                        document.getElementById('makeDecision').disabled = false;
+                        
+                        showIF();
+                        appendIFMessage('assistant', 'Cuando quieras, cuéntame qué está pasando por tu mente hoy.');
+                        initIFHandlers();
+                    } else {
+                        status.innerHTML = '<p style="color: orange;">⚠️ Sesión creada pero ID no encontrado. Ver consola para detalles.</p>';
+                        console.error('❌ No se pudo extraer el session_id de:', data);
+                    }
                 } else {
                     const error = await response.text();
                     status.innerHTML = '<p class="error">❌ Error: ' + error + '</p>';
@@ -402,6 +415,18 @@
             button.disabled = true;
             status.innerHTML = '<p>Registrando decisión...</p>';
 
+            // Preparar payload
+            const payload = {
+                session_id: currentSessionId,
+                decision_text: 'Decisión de prueba ClaraFlow',
+                context: { source: 'web_ui' }
+            };
+
+            console.log('🔍 DEBUG makeDecision:');
+            console.log('  📍 URL:', DECIDE_URL);
+            console.log('  📦 Payload:', payload);
+            console.log('  🆔 Session ID:', currentSessionId);
+
             try {
                 const response = await fetch(DECIDE_URL, {
                     method: 'POST',
@@ -410,23 +435,42 @@
                         'apikey': SUPABASE_ANON_KEY,
                         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
                     },
-                    body: JSON.stringify({
-                        session_id: currentSessionId,
-                        decision_text: 'Decisión de prueba ClaraFlow',
-                        context: { source: 'web_ui' }
-                    })
+                    body: JSON.stringify(payload)
                 });
+
+                console.log('📡 Respuesta recibida:');
+                console.log('  Status:', response.status);
+                console.log('  Status Text:', response.statusText);
+                console.log('  Headers:', [...response.headers.entries()]);
 
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('✅ Datos de respuesta:', data);
                     status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
                 } else {
-                    const error = await response.text();
-                    status.innerHTML = '<p class="error">❌ Error: ' + error + '</p>';
+                    const errorText = await response.text();
+                    console.error('❌ Error del servidor:', errorText);
+                    status.innerHTML = '<p class="error">❌ Error del servidor (Status ' + response.status + '): ' + errorText + '</p>';
                 }
                 button.disabled = false;
             } catch (error) {
-                status.innerHTML = '<p class="error">❌ Error de conexión: ' + error.message + '</p>';
+                console.error('❌ Error completo:', error);
+                console.error('  Nombre:', error.name);
+                console.error('  Mensaje:', error.message);
+                console.error('  Stack:', error.stack);
+                
+                // Diagnóstico detallado del error
+                let diagnostico = '';
+                if (error.message === 'Failed to fetch') {
+                    diagnostico = '<br><br><strong>Posibles causas:</strong><br>' +
+                                '1. Problema de CORS en el servidor<br>' +
+                                '2. El endpoint no existe o no está disponible<br>' +
+                                '3. Problema de red o firewall<br>' +
+                                '4. El servidor está caído<br><br>' +
+                                '<em>Verifica la consola del navegador para más detalles.</em>';
+                }
+                
+                status.innerHTML = '<p class="error">❌ Error de conexión: ' + error.message + diagnostico + '</p>';
                 button.disabled = false;
             }
         }
