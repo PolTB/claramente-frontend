@@ -241,7 +241,6 @@
 
         // FUNCIONES GLOBALES PARA ONBOARDING
         function nextScreen(screenNumber) {
-                    let currentSessionUuid = null; // UUID para nuevas integraciones
             console.log('✅ Navegando a pantalla:', screenNumber);
             document.querySelectorAll('.onboarding-screen').forEach(screen => {
                 screen.classList.remove('active');
@@ -373,9 +372,8 @@
                 if (response.ok) {
                     const data = await response.json();
                 console.log('🔍 Backend response completa:', data);
-                currentSessionUuid = data.session_uuid || data.data?.session_uuid || null; // PRIORIDAD: extraer UUID primero
-                    currentSessionId = data.session_id || data.id || data.sessionId || data.data?.session_id || data.data?.id;
-                console.log('✅ Session ID extraído:', currentSessionId);                    status.innerHTML = '<p status.innerHTML = `<p style="color: green;">✅ Sesión creada con ID: ${currentSessionId}${currentSessionUuid ? ` (UUID: ${currentSessionUuid})` : ''}</p>`;
+                currentSessionId = data.session_id || data.id || data.sessionId || data.data?.session_id || data.data?.id;
+                console.log('✅ Session ID extraído:', currentSessionId);                    status.innerHTML = '<p style="color: green;">✅ Sesión creada con ID: ' + currentSessionId + '</p>';
                     document.getElementById('makeDecision').disabled = false;
                     
                     showIF();
