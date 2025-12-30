@@ -371,8 +371,9 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    currentSessionId = data.session_id || data.id;
-                    status.innerHTML = '<p style="color: green;">✅ Sesión creada con ID: ' + currentSessionId + '</p>';
+                console.log('🔍 Backend response completa:', data);
+                currentSessionId = data.session_id || data.id || data.sessionId || data.data?.session_id || data.data?.id;
+                console.log('✅ Session ID extraído:', currentSessionId);                    status.innerHTML = '<p style="color: green;">✅ Sesión creada con ID: ' + currentSessionId + '</p>';
                     document.getElementById('makeDecision').disabled = false;
                     
                     showIF();
