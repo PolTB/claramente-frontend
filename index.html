@@ -213,13 +213,13 @@
                 
                 <div class="workflow-section">
                     <h2>Crear Nueva Sesión</h2>
-                    <button id="createSession">Iniciar Sesión de Trabajo</button>
+                    <button type="button" id="createSession">Iniciar Sesión de Trabajo</button>
                     <div id="sessionStatus"></div>
                 </div>
 
                 <div class="workflow-section">
                     <h2>Registrar Decisión</h2>
-                    <button id="makeDecision" disabled>Registrar Decisión</button>
+                    <button type="button" id="makeDecision" disabled>Registrar Decisión</button>
                     <div id="decisionStatus"></div>
                 </div>
             </div>
@@ -532,11 +532,23 @@
             const makeDecisionBtn = document.getElementById('makeDecision');
 
             if (createSessionBtn) {
-                createSessionBtn.addEventListener('click', createSession);
+                console.log('✅ Listener añadido a createSession');
+                createSessionBtn.addEventListener('click', function() {
+                    console.log('🔘 Click en Crear Sesión');
+                    createSession();
+                });
+            } else {
+                console.error('❌ No se encontró createSession');
             }
 
             if (makeDecisionBtn) {
-                makeDecisionBtn.addEventListener('click', makeDecision);
+                console.log('✅ Listener añadido a makeDecision');
+                makeDecisionBtn.addEventListener('click', function() {
+                    console.log('🔘 Click en Registrar Decisión');
+                    makeDecision();
+                });
+            } else {
+                console.error('❌ No se encontró makeDecision');
             }
 
             console.log('✅ Inicialización completada');
