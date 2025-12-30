@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-            <!-- ONBOARDING_V2_MARKER: T17 -->
-        <!-- BUILD_MARKER: T17_onboarding_fix_2025-12-26 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClaraFlow - Claramente</title>
@@ -29,15 +27,14 @@
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-
-                .onboarding-card {
-                                background: white;
-                                border-radius: 16px;
-                                padding: 48px;
-                                max-width: 720px;
-                                margin: 48px auto;
-                                box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-                            }
+        .onboarding-card {
+            background: white;
+            border-radius: 16px;
+            padding: 48px;
+            max-width: 720px;
+            margin: 48px auto;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        }
         .onboarding-screen {
             display: none;
             text-align: center;
@@ -45,11 +42,10 @@
         .onboarding-screen.active {
             display: block;
         }
-
-                .onboarding-screen h1,
-                .onboarding-screen p {
-                                color: #111827 !important;
-                            }
+        .onboarding-screen h1,
+        .onboarding-screen p {
+            color: #111827 !important;
+        }
         h1 {
             color: #333;
             margin-bottom: 20px;
@@ -115,8 +111,6 @@
             margin-top: 10px;
             font-size: 14px;
         }
-        
-        /* Spinner animation */
         .spinner {
             width: 50px;
             height: 50px;
@@ -125,12 +119,10 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* IF Loop Styles */
         #ifContainer { max-width: 720px; margin: 0 auto; padding: 16px; }
         .if-chat { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
         .if-bubble { padding: 12px 14px; border-radius: 12px; line-height: 1.35; white-space: pre-wrap; }
@@ -142,15 +134,11 @@
         .if-send[disabled] { opacity: 0.6; cursor: not-allowed; }
         .if-status { font-size: 14px; opacity: 0.8; margin-top: 6px; }
         .if-error { margin-top: 10px; font-size: 14px; color: #b91c1c; }
-        <!-- Onb
     </style>
 </head>
 <body>
-            <!-- ONBOARDING_V2_MARKER: T17 STEP1 -->
-    
-
-            <!-- Onboarding Screen 1 -->
-                <div class="onboarding-card">
+    <div class="onboarding-card">
+        <!-- Onboarding Screen 1 -->
         <div class="onboarding-screen active" id="screen1">
             <div class="progress">
                 <div class="progress-dot active"></div>
@@ -159,14 +147,14 @@
             </div>
             <h1>¡Bienvenido a ClaraFlow! 🎯</h1>
             <p>ClaraFlow te ayuda a tomar decisiones claras y organizadas mediante un sistema inteligente de flujo de trabajo.</p>
-                        <button type="button" id="btn-continuar">Continuar</button>
-                                        </div>
+            <button type="button" id="btn-continuar">Continuar</button>
+        </div>
+
         <!-- Onboarding Screen 2 -->
         <div class="onboarding-screen" id="screen2">
             <div class="progress">
                 <div class="progress-dot active"></div>
                 <div class="progress-dot active"></div>
-                <div class="progress-dot"></div>
                 <div class="progress-dot"></div>
             </div>
             <h1>¿Cómo funciona? 🤔</h1>
@@ -180,11 +168,11 @@
                 <div class="progress-dot active"></div>
                 <div class="progress-dot active"></div>
                 <div class="progress-dot active"></div>
-                <div class="progress-dot"></div>
             </div>
             <h1>Tu privacidad importa 🔒</h1>
             <p>Todas tus decisiones se guardan de forma segura. Solo tú tienes acceso a tu información.</p>
-                    <button type="button" id="btn-entendido">Entendido</button>
+            <button type="button" id="btn-entendido">Entendido</button>
+        </div>
 
         <!-- Onboarding Screen 4 -->
         <div class="onboarding-screen" id="screen4">
@@ -197,148 +185,82 @@
             <h1>¡Listo para empezar! 🚀</h1>
             <p>Vamos a comenzar tu primera sesión de ClaraFlow.</p>
             <button type="button" id="btn-comenzar">Comenzar</button>
+        </div>
 
         <!-- Main Application -->
         <div class="main-app" id="mainApp">
-                    <!-- Placeholder post-sesión -->
-        <div id="sessionPlaceholder" style="display: none; text-align: center; padding: 40px 20px;">
-            <div class="spinner" style="margin: 0 auto 30px;"></div>
-            <h1 style="font-size: 24px; margin-bottom: 15px;">Preparando tu experiencia ClaraFlow...</h1>
-            <p style="color: #666; font-size: 16px;">Estamos configurando tu sesión de decisión guiada</p>
-        </div>
-
-                    <!-- IF Loop Container -->
-        <div id="ifContainer" style="display:none;">
-            <div id="ifChat" class="if-chat"></div>
-            <div id="ifStatus" class="if-status" style="display:none;">Procesando...</div>
-            <div class="if-input-row">
-                <input id="ifInput" type="text" class="if-input" placeholder="Escribe aquí..." autocomplete="off"/>
-                <button id="ifSendBtn" class="if-send">Enviar</button>
-            </div>
-            <div id="ifError" class="if-error" style="display:none;"></div>
-        </div>
-
-        <!-- Dashboard original (oculto inicialmente) -->
-        <div id="dashboardContent">
-            <h1>ClaraFlow Dashboard</h1>
-            
-            <div class="workflow-section">
-                <h2>Crear Nueva Sesión</h2>
-                <button id="createSession">Iniciar Sesión de Trabajo</button>
-                <div id="sessionStatus"></div>
+            <!-- Placeholder post-sesión -->
+            <div id="sessionPlaceholder" style="display: none; text-align: center; padding: 40px 20px;">
+                <div class="spinner" style="margin: 0 auto 30px;"></div>
+                <h1 style="font-size: 24px; margin-bottom: 15px;">Preparando tu experiencia ClaraFlow...</h1>
+                <p style="color: #666; font-size: 16px;">Estamos configurando tu sesión de decisión guiada</p>
             </div>
 
-            <div class="workflow-section">
-                <h2>Registrar Decisión</h2>
-                <button id="makeDecision" disabled>Registrar Decisión</button>
-                <div id="decisionStatus"></div>
+            <!-- IF Loop Container -->
+            <div id="ifContainer" style="display:none;">
+                <div id="ifChat" class="if-chat"></div>
+                <div id="ifStatus" class="if-status" style="display:none;">Procesando...</div>
+                <div class="if-input-row">
+                    <input id="ifInput" type="text" class="if-input" placeholder="Escribe aquí..." autocomplete="off"/>
+                    <button id="ifSendBtn" class="if-send">Enviar</button>
+                </div>
+                <div id="ifError" class="if-error" style="display:none;"></div>
             </div>
-                    </div> <!-- Cierre dashboardContent -->
+
+            <!-- Dashboard original -->
+            <div id="dashboardContent">
+                <h1>ClaraFlow Dashboard</h1>
+                
+                <div class="workflow-section">
+                    <h2>Crear Nueva Sesión</h2>
+                    <button id="createSession">Iniciar Sesión de Trabajo</button>
+                    <div id="sessionStatus"></div>
+                </div>
+
+                <div class="workflow-section">
+                    <h2>Registrar Decisión</h2>
+                    <button id="makeDecision" disabled>Registrar Decisión</button>
+                    <div id="decisionStatus"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+        console.log('🚀 ClaraFlow v2.0 - Código cargado');
+
         // Configuration
         const SUPABASE_URL = 'https://dkjepsqgqtjmibxgaiys.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRramVwc3FncXRqbWlieGdhaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30.YH0RfmwXc3FncXRQqbHlidGdhX1zI1wicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30';
         const DECIDE_URL = 'https://claramente-edge-prod.vercel.app/api/claraflow-decide';
         const SESSION_URL = 'https://claramente-edge-prod.vercel.app/api/clara-flow-session';
-                const IF_URL = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
+        const IF_URL = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
 
         let currentSessionId = null;
+        let currentUserId = 'demo-user-' + Date.now();
 
+        // FUNCIONES GLOBALES PARA ONBOARDING
         function nextScreen(screenNumber) {
+            console.log('✅ Navegando a pantalla:', screenNumber);
             document.querySelectorAll('.onboarding-screen').forEach(screen => {
                 screen.classList.remove('active');
             });
-            document.getElementById('screen' + screenNumber).classList.add('active');
+            const targetScreen = document.getElementById('screen' + screenNumber);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            } else {
+                console.error('❌ Pantalla no encontrada:', 'screen' + screenNumber);
+            }
         }
 
         function completeOnboarding() {
+            console.log('✅ Completando onboarding');
             localStorage.setItem('claraflow_onboarding_complete', 'true');
             document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.remove('active'));
             document.getElementById('mainApp').classList.add('active');
         }
 
-        async function createSession() {
-            const button = document.getElementById('createSession');
-            const status = document.getElementById('sessionStatus');
-            
-            button.disabled = true;
-            status.innerHTML = '<p>Creando sesión...</p>';
-
-            try {
-                const response = await fetch(SESSION_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    },
-                    body: JSON.stringify({
-                        user_id: 'demo-user-' + Date.now(),
-                        phase: 'start'
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    currentSessionId = data.session_id || data.id;
-
-                // Show IF Loop and initialize handlers
-                showIF();
-                appendIFMessage('assistant', 'Cuando quieras, cuéntame qué está pasando por tu mente hoy.');
-                                    initIFHandlers();
-            } catch (error) {
-                status.innerHTML = `<p class="error">❌ Error de conexión: ${error.message}</p>`;
-                button.disabled = false;
-            }
-        }
-
-        async function makeDecision() {
-            const button = document.getElementById('makeDecision');
-            const status = document.getElementById('decisionStatus');
-            
-            if (!currentSessionId) {
-                status.innerHTML = '<p class="error">❌ Primero debes crear una sesión</p>';
-                return;
-            }
-
-            button.disabled = true;
-            status.innerHTML = '<p>Registrando decisión...</p>';
-
-            try {
-                const response = await fetch(DECIDE_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    },
-                    body: JSON.stringify({
-                        session_id: currentSessionId,
-                        decision_text: 'Decisión de prueba ClaraFlow',
-                        context: { source: 'web_ui' }
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
-                } else {
-                    const error = await response.text();
-                    status.innerHTML = `<p class="error">❌ Error: ${error}</p>`;
-                }
-                button.disabled = false;
-            } catch (error) {
-                status.innerHTML = `<p class="error">❌ Error de conexión: ${error.message}</p>`;
-                button.disabled = false;
-            }
-        }
-
-                // IF Loop Functions
-        let currentUserId = 'demo-user-' + Date.now();
-        
+        // IF Loop Functions
         function showIF() {
             const ph = document.getElementById('sessionPlaceholder');
             const ifC = document.getElementById('ifContainer');
@@ -350,7 +272,7 @@
             const chat = document.getElementById('ifChat');
             if (!chat) return;
             const bubble = document.createElement('div');
-            bubble.className = `if-bubble ${role === 'assistant' ? 'if-assistant' : 'if-user'}`;
+            bubble.className = 'if-bubble ' + (role === 'assistant' ? 'if-assistant' : 'if-user');
             bubble.textContent = text;
             chat.appendChild(bubble);
             bubble.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -368,8 +290,13 @@
         function setIFError(msg) {
             const el = document.getElementById('ifError');
             if (!el) return;
-            if (!msg) { el.style.display = 'none'; el.textContent = ''; }
-            else { el.style.display = 'block'; el.textContent = msg; }
+            if (!msg) { 
+                el.style.display = 'none'; 
+                el.textContent = ''; 
+            } else { 
+                el.style.display = 'block'; 
+                el.textContent = msg; 
+            }
         }
         
         async function sendIFMessage(userId, sessionId, text) {
@@ -381,7 +308,7 @@
             });
             const data = await res.json().catch(() => null);
             if (!res.ok || !data?.ok) {
-                const err = data?.error || `HTTP_${res.status}`;
+                const err = data?.error || 'HTTP_' + res.status;
                 throw new Error(err);
             }
             return data.reply;
@@ -411,80 +338,164 @@
                 }
             }
             
-            btn?.addEventListener('click', onSend);
-            input?.addEventListener('keydown', (ev) => {
-                if (ev.key === 'Enter') onSend();
-            });
+            if (btn) {
+                btn.addEventListener('click', onSend);
+            }
+            if (input) {
+                input.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter') onSend();
+                });
+            }
         }
 
-            // Direct event listeners for onboarding buttons
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM cargado - Inicializando event listeners...');
+        async function createSession() {
+            const button = document.getElementById('createSession');
+            const status = document.getElementById('sessionStatus');
             
+            button.disabled = true;
+            status.innerHTML = '<p>Creando sesión...</p>';
+
+            try {
+                const response = await fetch(SESSION_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                    },
+                    body: JSON.stringify({
+                        user_id: 'demo-user-' + Date.now(),
+                        phase: 'start'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentSessionId = data.session_id || data.id;
+                    status.innerHTML = '<p style="color: green;">✅ Sesión creada con ID: ' + currentSessionId + '</p>';
+                    document.getElementById('makeDecision').disabled = false;
+                    
+                    showIF();
+                    appendIFMessage('assistant', 'Cuando quieras, cuéntame qué está pasando por tu mente hoy.');
+                    initIFHandlers();
+                } else {
+                    const error = await response.text();
+                    status.innerHTML = '<p class="error">❌ Error: ' + error + '</p>';
+                    button.disabled = false;
+                }
+            } catch (error) {
+                status.innerHTML = '<p class="error">❌ Error de conexión: ' + error.message + '</p>';
+                button.disabled = false;
+            }
+        }
+
+        async function makeDecision() {
+            const button = document.getElementById('makeDecision');
+            const status = document.getElementById('decisionStatus');
+            
+            if (!currentSessionId) {
+                status.innerHTML = '<p class="error">❌ Primero debes crear una sesión</p>';
+                return;
+            }
+
+            button.disabled = true;
+            status.innerHTML = '<p>Registrando decisión...</p>';
+
+            try {
+                const response = await fetch(DECIDE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                    },
+                    body: JSON.stringify({
+                        session_id: currentSessionId,
+                        decision_text: 'Decisión de prueba ClaraFlow',
+                        context: { source: 'web_ui' }
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
+                } else {
+                    const error = await response.text();
+                    status.innerHTML = '<p class="error">❌ Error: ' + error + '</p>';
+                }
+                button.disabled = false;
+            } catch (error) {
+                status.innerHTML = '<p class="error">❌ Error de conexión: ' + error.message + '</p>';
+                button.disabled = false;
+            }
+        }
+
+        // INICIALIZACIÓN AL CARGAR LA PÁGINA
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM cargado - Inicializando event listeners');
+
             // Check onboarding status
             const hasCompletedOnboarding = localStorage.getItem('claraflow_onboarding_complete');
             if (hasCompletedOnboarding === 'true') {
+                console.log('ℹ️ Onboarding ya completado, mostrando dashboard');
                 document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.remove('active'));
                 document.getElementById('mainApp').classList.add('active');
             }
-            
+
             // Event listeners para botones de onboarding
             const btnContinuar = document.getElementById('btn-continuar');
             const btnSiguiente = document.getElementById('btn-siguiente');
             const btnEntendido = document.getElementById('btn-entendido');
             const btnComenzar = document.getElementById('btn-comenzar');
-            
+
             if (btnContinuar) {
+                console.log('✅ Listener añadido a btn-continuar');
                 btnContinuar.addEventListener('click', function() {
-                    console.log('Click en Continuar');
+                    console.log('🔘 Click en Continuar');
                     nextScreen(2);
                 });
+            } else {
+                console.error('❌ No se encontró btn-continuar');
             }
-            
+
             if (btnSiguiente) {
+                console.log('✅ Listener añadido a btn-siguiente');
                 btnSiguiente.addEventListener('click', function() {
-                    console.log('Click en Siguiente');
+                    console.log('🔘 Click en Siguiente');
                     nextScreen(3);
                 });
             }
-            
+
             if (btnEntendido) {
+                console.log('✅ Listener añadido a btn-entendido');
                 btnEntendido.addEventListener('click', function() {
-                    console.log('Click en Entendido');
+                    console.log('🔘 Click en Entendido');
                     nextScreen(4);
                 });
             }
-            
+
             if (btnComenzar) {
+                console.log('✅ Listener añadido a btn-comenzar');
                 btnComenzar.addEventListener('click', function() {
-                    console.log('Click en Comenzar');
+                    console.log('🔘 Click en Comenzar');
                     completeOnboarding();
                 });
             }
-            
+
             // Event listeners para dashboard
             const createSessionBtn = document.getElementById('createSession');
             const makeDecisionBtn = document.getElementById('makeDecision');
-            
+
             if (createSessionBtn) {
                 createSessionBtn.addEventListener('click', createSession);
             }
-            
+
             if (makeDecisionBtn) {
                 makeDecisionBtn.addEventListener('click', makeDecision);
             }
+
+            console.log('✅ Inicialización completada');
         });
-
-
-</script>
-    
-<!-- Fix button onclick - force new deployment -->
-<!-- Force redeploy -->
-    <!-- Trigger Vercel deployment -->
-            <!-- Force cache invalidation - T17 fix verification -->
-
-                            </body>
-                            </html>
-
-                    <!-- Force deployment -->
-<!-- T17 Final cache invalidation - Force complete CDN refresh -->
+    </script>
+</body>
+</html>
