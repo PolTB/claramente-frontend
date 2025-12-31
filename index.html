@@ -248,10 +248,23 @@ Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
         let currentUserId = 'demo-user-' + Date.now();
 
         // FUNCIONES GLOBALES PARA ONBOARDING
+        
+        // --- T17 Clarification Gate (GLOBAL) ---
+                let clarificationCompleted = false;
+                let clarificationShownAtLeastOnce = false;
+
+                function showClarificationScreen() {
+                                const el = document.getElementById('clarificationScreen');
+                                if (el) el.style.display = 'block';
+                                clarificationShownAtLeastOnce = true;
+                            }
+
+                function hideClarificationScreen() {
+                                const el = document.getElementById('clarificationScreen');
+                                if (el) el.style.display = 'none';
+                            }
         function nextScreen(screenNumber) {
             console.log('✅ Navegando a pantalla:', screenNumber);
-                    let clarificationCompleted = false;
-                    let clarificationShownAtLeastOnce = false;
             document.querySelectorAll('.onboarding-screen').forEach(screen => {
                 screen.classList.remove('active');
             });
@@ -276,23 +289,6 @@ Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
             const ifC = document.getElementById('ifContainer');
             if (ph) ph.style.display = 'none';
 
-                    // T17: Clarification Screen Helpers
-                    function showClarificationScreen() {
-                                    const el = document.getElementById('clarificationScreen');
-                                    if (el) el.style.display = 'block';
-                                    // Ocultar dashboard y chat IF para mantener foco
-                                    const dash = document.getElementById('dashboardContent');
-                                    if (dash) dash.style.display = 'none';
-                                    const ifc = document.getElementById('ifContainer');
-                                    if (ifc) ifc.style.display = 'none';
-                                    clarificationShownAtLeastOnce = true;
-                                }
-
-                    function hideClarificationScreen() {
-                                    const el = document.getElementById('clarificationScreen');
-                                    if (el) el.style.display = 'none';
-                                }
-            if (ifC) ifC.style.display = 'block';
         }
         
         function appendIFMessage(role, text) {
@@ -425,15 +421,11 @@ Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
                         status.innerHTML = '<p style="color: green;">✅ Sesión creada con ID: ' + currentSessionId + '</p>';
                         document.getElementById('makeDecision').disabled = false;
                         
-                        showIF();
-                        appendIFMessage('assistant', 'Cuando quieras, cuéntame qué está pasando por tu mente hoy.');
-                        initIFHandlers();
-                    } else {
-                // T17: Tras sesion creada, mostrar clarificacion
+
+                    // T17: Tras sesion creada, mostrar clarificacion
                                         clarificationCompleted = false;
                                         showClarificationScreen();
-                                        return;console.error('❌ No se pudo extraer el session_id de:', data);
-                    }
+                                        return; // no mostrar IF todavia} else {
                 } else {
                     const error = await response.text();
                     status.innerHTML = '<p class="error">❌ Error: ' + error + '</p>';
