@@ -197,6 +197,14 @@
             </div>
 
             <!-- IF Loop Container -->
+
+                    <!-- T17 Pantalla de Clarificacion -->
+                    <section id="clarificationScreen" style="display:none;" class="onboarding-card">
+                                    <h1>Aclaremos una cosa</h1>
+                                    <p style="white-space:pre-line;">No hace falta contarlo todo.
+Piensa en una situacion, decision o asunto concreto que ahora mismo te genera ruido.
+Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
+                                </section>
             <div id="ifContainer" style="display:none;">
                 <div id="ifChat" class="if-chat"></div>
                 <div id="ifStatus" class="if-status" style="display:none;">Procesando...</div>
@@ -242,6 +250,8 @@
         // FUNCIONES GLOBALES PARA ONBOARDING
         function nextScreen(screenNumber) {
             console.log('✅ Navegando a pantalla:', screenNumber);
+                    let clarificationCompleted = false;
+                    let clarificationShownAtLeastOnce = false;
             document.querySelectorAll('.onboarding-screen').forEach(screen => {
                 screen.classList.remove('active');
             });
@@ -265,6 +275,23 @@
             const ph = document.getElementById('sessionPlaceholder');
             const ifC = document.getElementById('ifContainer');
             if (ph) ph.style.display = 'none';
+
+                    // T17: Clarification Screen Helpers
+                    function showClarificationScreen() {
+                                    const el = document.getElementById('clarificationScreen');
+                                    if (el) el.style.display = 'block';
+                                    // Ocultar dashboard y chat IF para mantener foco
+                                    const dash = document.getElementById('dashboardContent');
+                                    if (dash) dash.style.display = 'none';
+                                    const ifc = document.getElementById('ifContainer');
+                                    if (ifc) ifc.style.display = 'none';
+                                    clarificationShownAtLeastOnce = true;
+                                }
+
+                    function hideClarificationScreen() {
+                                    const el = document.getElementById('clarificationScreen');
+                                    if (el) el.style.display = 'none';
+                                }
             if (ifC) ifC.style.display = 'block';
         }
         
@@ -324,6 +351,19 @@
                 
                 setIFError('');
                 appendIFMessage('user', text);
+                            // T17 Gate: Clarification completion check
+                            if (!clarificationCompleted) {
+                                                clarificationCompleted = true;
+                                                hideClarificationScreen();
+                                                // Mostrar IF container
+                                                const ifc = document.getElementById('ifContainer');
+                                                if (ifc) ifc.style.display = 'block';
+                                                // Mostrar primer mensaje del sistema (CMO copy) UNA SOLA VEZ
+                                                if (!window.__firstIfShown) {
+                                                                        window.__firstIfShown = true;
+                                                                        appendIFMessage('assistant', 'Cuando quieras, dime que es eso que ahora mismo te gustaria aclarar.');
+                                                                    }
+                                            }
                 if (input) input.value = '';
                 setIFProcessing(true);
                 
@@ -389,8 +429,10 @@
                         appendIFMessage('assistant', 'Cuando quieras, cuéntame qué está pasando por tu mente hoy.');
                         initIFHandlers();
                     } else {
-                        status.innerHTML = '<p style="color: orange;">⚠️ Sesión creada pero ID no encontrado. Ver consola para detalles.</p>';
-                        console.error('❌ No se pudo extraer el session_id de:', data);
+                // T17: Tras sesion creada, mostrar clarificacion
+                                        clarificationCompleted = false;
+                                        showClarificationScreen();
+                                        return;console.error('❌ No se pudo extraer el session_id de:', data);
                     }
                 } else {
                     const error = await response.text();
