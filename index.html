@@ -490,9 +490,13 @@ Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
                     const data = await response.json();
                     console.log('✅ Datos de respuesta:', data);
                     status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada exitosamente con ID: ' + data.id + '</p></div>';
-                                    // T17: Mostrar pantalla de clarificación tras decisión
-                                    clarificationCompleted = false;
-                                    showClarificationScreen();
+                                    // T17: Mostrar pantalla de clarificación directamente
+                const clarScreen = document.getElementById('clarificationScreen');
+                const dashContent = document.getElementById('dashboardContent');
+                const ifCont = document.getElementById('ifContainer');
+                if (clarScreen) clarScreen.style.display = 'block';
+                if (dashContent) dashContent.style.display = 'none';
+                if (ifCont) ifCont.style.display = 'none';
                 } else {
                     const errorText = await response.text();
                     console.error('❌ Error del servidor:', errorText);
