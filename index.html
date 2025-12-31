@@ -403,7 +403,8 @@
             }
         }
 
-        async function makeDecision() {
+        420
+        () {
             const button = document.getElementById('makeDecision');
             const status = document.getElementById('decisionStatus');
             
@@ -418,6 +419,7 @@
             // Preparar payload
             const payload = {
                 session_id: currentSessionId,
+                            user_id: currentUserId,
                 decision_text: 'Decisión de prueba ClaraFlow',
                 context: { source: 'web_ui' }
             };
