@@ -447,7 +447,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     console.log('✅ Datos de respuesta:', data);
-                    status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
+                    status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p></div>';
                 } else {
                     const errorText = await response.text();
                     console.error('❌ Error del servidor:', errorText);
