@@ -197,14 +197,6 @@
             </div>
 
             <!-- IF Loop Container -->
-
-                    <!-- T17 Pantalla de Clarificacion -->
-                    <section id="clarificationScreen" style="display:none;" class="onboarding-card">
-                                    <h1>Aclaremos una cosa</h1>
-                                    <p style="white-space:pre-line;">No hace falta contarlo todo.
-Piensa en una situacion, decision o asunto concreto que ahora mismo te genera ruido.
-Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
-                                </section>
             <div id="ifContainer" style="display:none;">
                 <div id="ifChat" class="if-chat"></div>
                 <div id="ifStatus" class="if-status" style="display:none;">Procesando...</div>
@@ -248,21 +240,6 @@ Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
         let currentUserId = 'demo-user-' + Date.now();
 
         // FUNCIONES GLOBALES PARA ONBOARDING
-        
-        // --- T17 Clarification Gate (GLOBAL) ---
-                let clarificationCompleted = false;
-                let clarificationShownAtLeastOnce = false;
-
-                function showClarificationScreen() {
-                                const el = document.getElementById('clarificationScreen');
-                                if (el) el.style.display = 'block';
-                                clarificationShownAtLeastOnce = true;
-                            }
-
-                function hideClarificationScreen() {
-                                const el = document.getElementById('clarificationScreen');
-                                if (el) el.style.display = 'none';
-                            }
         function nextScreen(screenNumber) {
             console.log('✅ Navegando a pantalla:', screenNumber);
             document.querySelectorAll('.onboarding-screen').forEach(screen => {
@@ -288,7 +265,7 @@ Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
             const ph = document.getElementById('sessionPlaceholder');
             const ifC = document.getElementById('ifContainer');
             if (ph) ph.style.display = 'none';
-
+            if (ifC) ifC.style.display = 'block';
         }
         
         function appendIFMessage(role, text) {
@@ -347,19 +324,6 @@ Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
                 
                 setIFError('');
                 appendIFMessage('user', text);
-                            // T17 Gate: Clarification completion check
-                            if (!clarificationCompleted) {
-                                                clarificationCompleted = true;
-                                                hideClarificationScreen();
-                                                // Mostrar IF container
-                                                const ifc = document.getElementById('ifContainer');
-                                                if (ifc) ifc.style.display = 'block';
-                                                // Mostrar primer mensaje del sistema (CMO copy) UNA SOLA VEZ
-                                                if (!window.__firstIfShown) {
-                                                                        window.__firstIfShown = true;
-                                                                        appendIFMessage('assistant', 'Cuando quieras, dime que es eso que ahora mismo te gustaria aclarar.');
-                                                                    }
-                                            }
                 if (input) input.value = '';
                 setIFProcessing(true);
                 
@@ -421,11 +385,13 @@ Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
                         status.innerHTML = '<p style="color: green;">✅ Sesión creada con ID: ' + currentSessionId + '</p>';
                         document.getElementById('makeDecision').disabled = false;
                         
-
-                    // T17: Tras sesion creada, mostrar clarificacion
-                                        clarificationCompleted = false;
-                                        showClarificationScreen();
-                                        return; // no mostrar IF todavia} else {
+                        showIF();
+                        appendIFMessage('assistant', 'Cuando quieras, cuéntame qué está pasando por tu mente hoy.');
+                        initIFHandlers();
+                    } else {
+                        status.innerHTML = '<p style="color: orange;">⚠️ Sesión creada pero ID no encontrado. Ver consola para detalles.</p>';
+                        console.error('❌ No se pudo extraer el session_id de:', data);
+                    }
                 } else {
                     const error = await response.text();
                     status.innerHTML = '<p class="error">❌ Error: ' + error + '</p>';
@@ -481,14 +447,7 @@ Vamos a mirarlo con calma para ganar un poco mas de claridad.</p>
                 if (response.ok) {
                     const data = await response.json();
                     console.log('✅ Datos de respuesta:', data);
-                    status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada exitosamente con ID: ' + data.id + '</p></div>';
-                                    // T17: Mostrar pantalla de clarificación directamente
-                const clarScreen = document.getElementById('clarificationScreen');
-                const dashContent = document.getElementById('dashboardContent');
-                const ifCont = document.getElementById('ifContainer');
-                if (clarScreen) clarScreen.style.display = 'block';
-                if (dashContent) dashContent.style.display = 'none';
-                if (ifCont) ifCont.style.display = 'none';
+                    status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
                 } else {
                     const errorText = await response.text();
                     console.error('❌ Error del servidor:', errorText);
