@@ -414,6 +414,11 @@
                     currentSessionId = data.session_id || data.id || data.sessionId || data.data?.session_id || data.data?.id;
                     
                     console.log('✅ Session ID extraído:', currentSessionId);
+
+                // 🚪 Gate: show clarification before IF
+                clarificationCompleted = false;
+                showClarificationScreen();
+                return;
                     
                     if (currentSessionId) {
                         status.innerHTML = '<p style="color: green;">✅ Sesión creada con ID: ' + currentSessionId + '</p>';
