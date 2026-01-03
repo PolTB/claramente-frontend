@@ -239,6 +239,7 @@
 
         // Configuration
         const SUPABASE_URL = 'https://dkjepsqgqtjmibxgaiys.supabase.co';
+        
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRramVwc3FncXRqbWlieGdhaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30.YH0RfmwXc3FncXRQqbHlidGdhX1zI1wicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30';
         const DECIDE_URL = 'https://claramente-edge-prod.vercel.app/api/claraflow-decide';
         const SESSION_URL = 'https://claramente-edge-prod.vercel.app/api/clara-flow-session';
@@ -359,7 +360,32 @@
         async function createSession() {
             const button = document.getElementById('createSession');
             const status = document.getElementById('sessionStatus');
-            
+
+
+            // ===== PASO 2: Estado y helpers en scope global (Pantalla de Clarificación) =====
+    let clarificationCompleted = false;
+
+    function showClarificationScreen() {
+        const clar = document.getElementById('clarificationScreen');
+        if (clar) clar.style.display = 'block';
+
+        const dash = document.getElementById('dashboardContent');
+        if (dash) dash.style.display = 'none';
+
+        const ifc = document.getElementById('ifContainer');
+        if (ifc) ifc.style.display = 'none';
+    }
+
+    function hideClarificationScreen() {
+        const clar = document.getElementById('clarificationScreen');
+        if (clar) clar.style.display = 'none';
+    }
+
+    function showIFContainer() {
+        const ifc = document.getElementById('ifContainer');
+        if (ifc) ifc.style.display = 'block';
+    }
+
             button.disabled = true;
             status.innerHTML = '<p>Creando sesión...</p>';
 
