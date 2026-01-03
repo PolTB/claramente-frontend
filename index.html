@@ -244,6 +244,7 @@
         const DECIDE_URL = 'https://claramente-edge-prod.vercel.app/api/claraflow-decide';
         const SESSION_URL = 'https://claramente-edge-prod.vercel.app/api/clara-flow-session';
         const IF_URL = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
+const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustaría aclarar.";
 
         let currentSessionId = null;
         let currentUserId = 'demo-user-' + Date.now();
@@ -330,6 +331,17 @@
             async function onSend() {
                 const text = (input?.value || '').trim();
                 if (!text) return;
+
+        // Gate: el primer envío completa la clarificación y activa el chat
+        if (!clarificationCompleted) {
+            clarificationCompleted = true;
+            hideClarificationScreen();
+            showIFContainer();
+            if (!window.__firstIfShown) {
+                window.__firstIfShown = true;
+                appendIFMessage('assistant', FIRST_IF_MSG);
+            }
+        }
                 
                 setIFError('');
                 appendIFMessage('user', text);
