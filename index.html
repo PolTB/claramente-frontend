@@ -124,13 +124,25 @@
             100% { transform: rotate(360deg); }
         }
         #ifContainer { max-width: 720px; margin: 0 auto; padding: 16px; }
-        .if-chat { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+        .if-chat { 
+            display: none; /* Oculto por defecto */
+            flex-direction: column; 
+            gap: 12px; 
+            margin-bottom: 12px; 
+        }
+        .if-chat.visible {
+            display: flex; /* Se muestra como flex cuando tiene clase visible */
+        }
         .if-bubble { padding: 12px 14px; border-radius: 12px; line-height: 1.35; white-space: pre-wrap; }
         .if-assistant { background: #f3f4f6; align-self: flex-start; }
         .if-user { background: #111827; color: white; align-self: flex-end; }
         .if-input-row { display: flex; gap: 10px; margin-top: 8px; }
-        .if-input { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; }
-        .if-send { padding: 12px 14px; border-radius: 10px; border: 0; background: #111827; color: white; cursor: pointer; }
+        #clarificationScreen + .if-chat + .if-status + .if-input-row {
+            margin-top: 40px; /* Espacio entre mensaje de clarificación e input */
+        }
+        .if-input { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; font-size: 16px; }
+        .if-send { padding: 12px 14px; border-radius: 10px; border: 0; background: #111827; color: white; cursor: pointer; font-weight: 600; }
+        .if-send:hover { background: #374151; }
         .if-send[disabled] { opacity: 0.6; cursor: not-allowed; }
         .if-status { font-size: 14px; opacity: 0.8; margin-top: 6px; }
         .if-error { margin-top: 10px; font-size: 14px; color: #b91c1c; }
@@ -197,19 +209,19 @@
             </div>
 
             <!-- IF Loop Container -->
-            
-        <!-- Pantalla de Clarificación -->
-        <section id="clarificationScreen" style="display:none;" class="onboarding-card">
-            <h1>Aclaremos una cosa</h1>
-            <p>
-                No hace falta contarlo todo. Piensa en una situación, decisión o asunto concreto que ahora mismo te genera ruido. Vamos a mirarlo con calma para ganar un poco más de claridad.
-            </p>
-        </section>
             <div id="ifContainer" style="display:none;">
-                <div id="ifChat" class="if-chat"></div>
+                <!-- Pantalla de Clarificación -->
+                <div id="clarificationScreen" style="display:none; text-align: center; padding: 40px 20px; margin-bottom: 30px;">
+                    <h1 style="font-size: 28px; margin-bottom: 20px; color: #111827;">Aclaremos una cosa</h1>
+                    <p style="color: #666; font-size: 16px; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+                        No hace falta contarlo todo. Piensa en una situación, decisión o asunto concreto que ahora mismo te genera ruido. Vamos a mirarlo con calma para ganar un poco más de claridad.
+                    </p>
+                </div>
+                
+                <div id="ifChat" class="if-chat" style="display:none;"></div>
                 <div id="ifStatus" class="if-status" style="display:none;">Procesando...</div>
                 <div class="if-input-row">
-                    <input id="ifInput" type="text" class="if-input" placeholder="Escribe aquí..." autocomplete="off"/>
+                    <input id="ifInput" type="text" class="if-input" placeholder="Cuéntame qué está pasando..." autocomplete="off"/>
                     <button id="ifSendBtn" class="if-send">Enviar</button>
                 </div>
                 <div id="ifError" class="if-error" style="display:none;"></div>
@@ -228,6 +240,7 @@
                 <div class="workflow-section">
                     <h2>Registrar Decisión</h2>
                     <button type="button" id="makeDecision" disabled>Registrar Decisión</button>
+                    <button type="button" id="testCors" style="margin-left: 10px; background: #e67e22;">🧪 Test CORS</button>
                     <div id="decisionStatus"></div>
                 </div>
             </div>
@@ -239,15 +252,14 @@
 
         // Configuration
         const SUPABASE_URL = 'https://dkjepsqgqtjmibxgaiys.supabase.co';
-        
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRramVwc3FncXRqbWlieGdhaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30.YH0RfmwXc3FncXRQqbHlidGdhX1zI1wicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30';
         const DECIDE_URL = 'https://claramente-edge-prod.vercel.app/api/claraflow-decide';
         const SESSION_URL = 'https://claramente-edge-prod.vercel.app/api/clara-flow-session';
         const IF_URL = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
-const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustaría aclarar.";
 
         let currentSessionId = null;
         let currentUserId = 'demo-user-' + Date.now();
+        let isFirstMessage = true; // Control para el primer mensaje
 
         // FUNCIONES GLOBALES PARA ONBOARDING
         function nextScreen(screenNumber) {
@@ -272,10 +284,42 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
 
         // IF Loop Functions
         function showIF() {
+            console.log('📺 Mostrando pantalla de clarificación + input');
             const ph = document.getElementById('sessionPlaceholder');
             const ifC = document.getElementById('ifContainer');
+            const clarScreen = document.getElementById('clarificationScreen');
+            const ifChatDiv = document.getElementById('ifChat');
+            const ifInputEl = document.getElementById('ifInput');
+            const ifInputRow = document.querySelector('.if-input-row');
+            
+            // Ocultar placeholder, mostrar container
             if (ph) ph.style.display = 'none';
             if (ifC) ifC.style.display = 'block';
+            
+            // Mostrar pantalla de clarificación
+            if (clarScreen) {
+                clarScreen.style.display = 'block';
+                console.log('✅ Pantalla de clarificación: VISIBLE');
+            }
+            
+            // Ocultar historial de chat inicialmente
+            if (ifChatDiv) {
+                ifChatDiv.style.display = 'none';
+                console.log('✅ Historial de chat: OCULTO');
+            }
+            
+            // Verificar que input row esté visible
+            if (ifInputRow) {
+                console.log('✅ Input row: VISIBLE (display=' + window.getComputedStyle(ifInputRow).display + ')');
+            }
+            
+            // Enfocar el input
+            if (ifInputEl) {
+                ifInputEl.focus();
+                console.log('✅ Input enfocado y listo para escribir');
+            }
+            
+            console.log('✅ Estado final: Clarificación + Input visibles, Chat oculto');
         }
         
         function appendIFMessage(role, text) {
@@ -331,19 +375,38 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
             async function onSend() {
                 const text = (input?.value || '').trim();
                 if (!text) return;
-
-        // Gate: el primer envío completa la clarificación y activa el chat
-        if (!clarificationCompleted) {
-            clarificationCompleted = true;
-            hideClarificationScreen();
-            showIFContainer();
-            if (!window.__firstIfShown) {
-                window.__firstIfShown = true;
-                appendIFMessage('assistant', FIRST_IF_MSG);
-            }
-        }
+                
+                console.log('📤 Enviando mensaje:', text);
+                console.log('🔍 Es primer mensaje:', isFirstMessage);
                 
                 setIFError('');
+                
+                // Si es el primer mensaje, hacer la transición
+                if (isFirstMessage) {
+                    console.log('🎬 Primer mensaje detectado - iniciando transición');
+                    
+                    // Ocultar pantalla de clarificación
+                    const clarScreen = document.getElementById('clarificationScreen');
+                    if (clarScreen) {
+                        clarScreen.style.display = 'none';
+                        console.log('✅ Pantalla de clarificación oculta');
+                    }
+                    
+                    // Mostrar historial de chat
+                    const ifChatDiv = document.getElementById('ifChat');
+                    if (ifChatDiv) {
+                        ifChatDiv.style.display = 'flex';
+                        console.log('✅ Historial de chat visible');
+                    }
+                    
+                    // Añadir mensaje del sistema
+                    appendIFMessage('assistant', 'Cuando quieras, dime qué es eso que ahora mismo te gustaría aclarar.');
+                    
+                    // Marcar que ya no es el primer mensaje
+                    isFirstMessage = false;
+                }
+                
+                // Añadir mensaje del usuario
                 appendIFMessage('user', text);
                 if (input) input.value = '';
                 setIFProcessing(true);
@@ -352,6 +415,7 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
                     const reply = await sendIFMessage(currentUserId, currentSessionId, text);
                     appendIFMessage('assistant', reply);
                 } catch (e) {
+                    console.error('❌ Error al enviar mensaje:', e);
                     setIFError('No hemos podido responder ahora. Reintenta.');
                 } finally {
                     setIFProcessing(false);
@@ -361,43 +425,20 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
             
             if (btn) {
                 btn.addEventListener('click', onSend);
+                console.log('✅ Event listener añadido a ifSendBtn');
             }
             if (input) {
                 input.addEventListener('keydown', (ev) => {
                     if (ev.key === 'Enter') onSend();
                 });
+                console.log('✅ Event listener Enter añadido a ifInput');
             }
         }
 
         async function createSession() {
             const button = document.getElementById('createSession');
             const status = document.getElementById('sessionStatus');
-
-
-            // ===== PASO 2: Estado y helpers en scope global (Pantalla de Clarificación) =====
-    let clarificationCompleted = false;
-
-    function showClarificationScreen() {
-        const clar = document.getElementById('clarificationScreen');
-        if (clar) clar.style.display = 'block';
-
-        const dash = document.getElementById('dashboardContent');
-        if (dash) dash.style.display = 'none';
-
-        const ifc = document.getElementById('ifContainer');
-        if (ifc) ifc.style.display = 'none';
-    }
-
-    function hideClarificationScreen() {
-        const clar = document.getElementById('clarificationScreen');
-        if (clar) clar.style.display = 'none';
-    }
-
-    function showIFContainer() {
-        const ifc = document.getElementById('ifContainer');
-        if (ifc) ifc.style.display = 'block';
-    }
-
+            
             button.disabled = true;
             status.innerHTML = '<p>Creando sesión...</p>';
 
@@ -426,18 +467,19 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
                     currentSessionId = data.session_id || data.id || data.sessionId || data.data?.session_id || data.data?.id;
                     
                     console.log('✅ Session ID extraído:', currentSessionId);
-
-                // 🚪 Gate: show clarification before IF
-                clarificationCompleted = false;
-                showClarificationScreen();
-                return;
                     
                     if (currentSessionId) {
                         status.innerHTML = '<p style="color: green;">✅ Sesión creada con ID: ' + currentSessionId + '</p>';
                         document.getElementById('makeDecision').disabled = false;
                         
+                        // Reiniciar el flag de primer mensaje
+                        isFirstMessage = true;
+                        console.log('🔄 Flag isFirstMessage reiniciado a true');
+                        
+                        // Mostrar pantalla de clarificación + input
                         showIF();
-                        appendIFMessage('assistant', 'Cuando quieras, cuéntame qué está pasando por tu mente hoy.');
+                        
+                        // Inicializar handlers del chat
                         initIFHandlers();
                     } else {
                         status.innerHTML = '<p style="color: orange;">⚠️ Sesión creada pero ID no encontrado. Ver consola para detalles.</p>';
@@ -454,8 +496,8 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
             }
         }
 
-    async function makeDecision() {
-        const button = document.getElementById('makeDecision');
+        async function makeDecision() {
+            const button = document.getElementById('makeDecision');
             const status = document.getElementById('decisionStatus');
             
             if (!currentSessionId) {
@@ -469,7 +511,6 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
             // Preparar payload
             const payload = {
                 session_id: currentSessionId,
-                            user_id: currentUserId,
                 decision_text: 'Decisión de prueba ClaraFlow',
                 context: { source: 'web_ui' }
             };
@@ -479,6 +520,27 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
             console.log('  📦 Payload:', payload);
             console.log('  🆔 Session ID:', currentSessionId);
 
+            // NUEVA PRUEBA: Primero verificar OPTIONS
+            console.log('🧪 PRUEBA 1: Verificando OPTIONS...');
+            try {
+                const optionsTest = await fetch(DECIDE_URL, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'content-type,apikey,authorization'
+                    }
+                });
+                console.log('✅ OPTIONS Status:', optionsTest.status);
+                console.log('✅ OPTIONS Headers:', {
+                    origin: optionsTest.headers.get('access-control-allow-origin'),
+                    methods: optionsTest.headers.get('access-control-allow-methods'),
+                    headers: optionsTest.headers.get('access-control-allow-headers')
+                });
+            } catch (optionsError) {
+                console.error('❌ OPTIONS falló:', optionsError);
+            }
+
+            console.log('🧪 PRUEBA 2: Intentando POST...');
             try {
                 const response = await fetch(DECIDE_URL, {
                     method: 'POST',
@@ -498,7 +560,7 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
                 if (response.ok) {
                     const data = await response.json();
                     console.log('✅ Datos de respuesta:', data);
-                    status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p></div>';
+                    status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
                 } else {
                     const errorText = await response.text();
                     console.error('❌ Error del servidor:', errorText);
@@ -582,6 +644,7 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
             // Event listeners para dashboard
             const createSessionBtn = document.getElementById('createSession');
             const makeDecisionBtn = document.getElementById('makeDecision');
+            const testCorsBtn = document.getElementById('testCors');
 
             if (createSessionBtn) {
                 console.log('✅ Listener añadido a createSession');
@@ -601,6 +664,14 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
                 });
             } else {
                 console.error('❌ No se encontró makeDecision');
+            }
+
+            if (testCorsBtn) {
+                console.log('✅ Listener añadido a testCors');
+                testCorsBtn.addEventListener('click', function() {
+                    console.log('🔘 Click en Test CORS');
+                    testCors();
+                });
             }
 
             console.log('✅ Inicialización completada');
