@@ -589,11 +589,17 @@
                 return;
             }
 
+            if (!currentUserId) {
+                status.innerHTML = '<p class="error">❌ Usuario no identificado. Recarga la página.</p>';
+                return;
+            }
+
             button.disabled = true;
             status.innerHTML = '<p>Registrando decisión...</p>';
 
-            // Preparar payload
+            // Preparar payload CON user_id
             const payload = {
+                user_id: currentUserId,  // ← FIX: Añadido user_id
                 session_id: currentSessionId,
                 decision_text: 'Decisión de prueba ClaraFlow',
                 context: { source: 'web_ui' }
@@ -602,6 +608,7 @@
             console.log('🔍 DEBUG makeDecision:');
             console.log('  📍 URL:', DECIDE_URL);
             console.log('  📦 Payload:', payload);
+            console.log('  👤 User ID:', currentUserId);
             console.log('  🆔 Session ID:', currentSessionId);
 
             // NUEVA PRUEBA: Primero verificar OPTIONS
