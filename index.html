@@ -651,11 +651,10 @@
                 if (response.ok) {
                     const data = await response.json();
                     console.log('✅ Datos de respuesta:', data);
-                    status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
-                } else {
+        status.innerHTML = '<div class="decision-box"><p style="color: green;">✅ Decisión registrada!</p></div>';                } else {
                     const errorText = await response.text();
                     console.error('❌ Error del servidor:', errorText);
-                    status.innerHTML = '<p class="error">❌ Error del servidor (Status ' + response.status + '): ' + errorText + '</p>';
+                    status.innerHTML = '<p class="error">❌ Error del servidor (
                 }
                 button.disabled = false;
             } catch (error) {
