@@ -354,15 +354,64 @@
         }
         
         async function sendIFMessage(userId, sessionId, text) {
-            const payload = { user_id: userId, session_id: String(sessionId || 'demo'), text };
+            // Validación exhaustiva antes de crear el payload
+            console.log('🔍 VALIDACIÓN PRE-ENVÍO:');
+            console.log('  userId recibido:', userId, '(tipo:', typeof userId, ')');
+            console.log('  sessionId recibido:', sessionId, '(tipo:', typeof sessionId, ')');
+            console.log('  text recibido:', text, '(tipo:', typeof text, ')');
+            
+            // Asegurar que userId y sessionId no sean undefined/null
+            if (!userId) {
+                console.error('❌ userId está vacío:', userId);
+                throw new Error('userId no puede estar vacío');
+            }
+            if (!sessionId) {
+                console.error('❌ sessionId está vacío:', sessionId);
+                throw new Error('sessionId no puede estar vacío');
+            }
+            
+            const payload = { 
+                user_id: String(userId),  // Forzar a string
+                session_id: String(sessionId), 
+                text: String(text)  // Forzar a string
+            };
+            
+            console.log('📦 PAYLOAD CONSTRUIDO:');
+            console.log('  payload completo:', JSON.stringify(payload, null, 2));
+            console.log('  URL destino:', IF_URL);
+            
             const res = await fetch(IF_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(payload),
             });
-            const data = await res.json().catch(() => null);
+            
+            console.log('📡 Respuesta del servidor:');
+            console.log('  Status:', res.status);
+            console.log('  Status Text:', res.statusText);
+            
+            const responseText = await res.text();
+            console.log('  Response body (raw):', responseText);
+            
+            let data = null;
+            try {
+                data = JSON.parse(responseText);
+                console.log('  Data parseada:', data);
+            } catch (e) {
+                console.error('  ⚠️ No se pudo parsear JSON:', e);
+            }
+            
             if (!res.ok || !data?.ok) {
                 const err = data?.error || 'HTTP_' + res.status;
+                console.error('❌ Error completo:', { 
+                    status: res.status, 
+                    data,
+                    rawResponse: responseText,
+                    url: IF_URL,
+                    payload: payload
+                });
                 throw new Error(err);
             }
             return data.reply;
@@ -376,8 +425,28 @@
                 const text = (input?.value || '').trim();
                 if (!text) return;
                 
-                console.log('📤 Enviando mensaje:', text);
-                console.log('🔍 Es primer mensaje:', isFirstMessage);
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('📤 NUEVO MENSAJE - Inicio del proceso');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                
+                // Verificación de variables globales
+                console.log('🔍 Estado de variables globales:');
+                console.log('  currentUserId:', currentUserId, '(tipo:', typeof currentUserId, ')');
+                console.log('  currentSessionId:', currentSessionId, '(tipo:', typeof currentSessionId, ')');
+                console.log('  isFirstMessage:', isFirstMessage);
+                console.log('  text del mensaje:', text);
+                
+                // Verificación de seguridad
+                if (!currentUserId) {
+                    console.error('❌ currentUserId no está definido');
+                    setIFError('Error: Usuario no identificado. Recarga la página.');
+                    return;
+                }
+                if (!currentSessionId) {
+                    console.error('❌ currentSessionId no está definido');
+                    setIFError('Error: Sesión no encontrada. Crea una nueva sesión.');
+                    return;
+                }
                 
                 setIFError('');
                 
@@ -414,8 +483,17 @@
                 try {
                     const reply = await sendIFMessage(currentUserId, currentSessionId, text);
                     appendIFMessage('assistant', reply);
+                    console.log('✅ Mensaje procesado correctamente');
+                    console.log('🔍 Variables después del envío:');
+                    console.log('  currentUserId:', currentUserId);
+                    console.log('  currentSessionId:', currentSessionId);
+                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                 } catch (e) {
                     console.error('❌ Error al enviar mensaje:', e);
+                    console.error('🔍 Variables en el momento del error:');
+                    console.error('  currentUserId:', currentUserId);
+                    console.error('  currentSessionId:', currentSessionId);
+                    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                     setIFError('No hemos podido responder ahora. Reintenta.');
                 } finally {
                     setIFProcessing(false);
@@ -441,6 +519,12 @@
             
             button.disabled = true;
             status.innerHTML = '<p>Creando sesión...</p>';
+            
+            // Asegurar que currentUserId esté definido
+            if (!currentUserId) {
+                currentUserId = 'demo-user-' + Date.now();
+            }
+            console.log('👤 User ID para sesión:', currentUserId);
 
             try {
                 const response = await fetch(SESSION_URL, {
@@ -451,7 +535,7 @@
                         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
                     },
                     body: JSON.stringify({
-                        user_id: 'demo-user-' + Date.now(),
+                        user_id: currentUserId,
                         phase: 'start'
                     })
                 });
