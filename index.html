@@ -336,8 +336,9 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
         if (!clarificationCompleted) {
             clarificationCompleted = true;
             hideClarificationScreen();
-            showIFContainer();
-            if (!window.__firstIfShown) {
+            // ✅ Show chat history now
+            const chat = document.getElementById('ifChat');
+            if (chat) chat.style.display = 'block';            if (!window.__firstIfShown) {
                 window.__firstIfShown = true;
                 appendIFMessage('assistant', FIRST_IF_MSG);
             }
@@ -385,8 +386,19 @@ const FIRST_IF_MSG = "Cuando quieras, dime qué es eso que ahora mismo te gustar
         if (dash) dash.style.display = 'none';
 
         const ifc = document.getElementById('ifContainer');
-        if (ifc) ifc.style.display = 'none';
-    }
+        if (ifc) ifc.style.display = 'block';  // ✅ Show input during clarification    }
+        
+        // ✅ Hide placeholder if exists
+        const placeholder = document.getElementById('sessionPlaceholder');
+        if (placeholder) placeholder.style.display = 'none';
+
+        // ✅ Hide chat history but show input
+        const chat = document.getElementById('ifChat');
+        if (chat) chat.style.display = 'none';
+
+        // ✅ Focus input for direct writing
+        const input = document.getElementById('ifInput');
+        if (input) input.focus();
 
     function hideClarificationScreen() {
         const clar = document.getElementById('clarificationScreen');
