@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
     <title>ClaraFlow - Decisiones Claras</title>
     <style>
         /* RESET & BASE */
@@ -171,7 +172,7 @@
         .msg-user { align-self: flex-end; background: #4c51bf; color: white; border-bottom-right-radius: 4px; }
         .msg-bot { align-self: flex-start; background: #fff; color: #333; border-bottom-left-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .msg-system { align-self: center; background: rgba(254, 252, 191, 0.9); color: #744210; font-size: 0.85rem; text-align: center; border: 1px solid rgba(246, 224, 94, 0.5); width: 90%; }
-        .msg-error { background: #fed7d7; color: #742a2a; align-self: center; width: 90%; text-align: center; border: 1px solid #fc8181; }
+        .msg-error { background: #fed7d7; color: #742a2a; align-self: center; width: 90%; text-align: center; border: 1px solid #fc8181; word-break: break-word;}
 
         /* FOOTER */
         .footer {
@@ -299,7 +300,7 @@
         </div>
 
         <div class="footer">
-            <p>ClaraFlow • Single-file HTML • Sin dependencias</p>
+            <p>ClaraFlow • Single-file HTML • CORS Optimized</p>
             <p style="opacity: 0.6; margin-top: 4px;" id="debugFooter">Debug: Loading...</p>
         </div>
     </div>
@@ -314,7 +315,7 @@
         // --- VARIABLES GLOBALES ---
         let currentSessionId = null;
         let currentUserId = localStorage.getItem('claraflow_userid') || 'demo-user-' + Date.now();
-        // Guardamos el usuario para persistencia básica
+        
         if(!localStorage.getItem('claraflow_userid')) {
             localStorage.setItem('claraflow_userid', currentUserId);
         }
@@ -327,13 +328,12 @@
             checkOnboarding();
             updateDebugInfo();
             
-            // Chequeo si hay sesión guardada en memoria (opcional, pero buena práctica si refrescan)
             const savedSession = localStorage.getItem('claraflow_session_id');
             if(savedSession) {
                 currentSessionId = savedSession;
                 document.getElementById('decisionArea').classList.remove('hidden');
                 document.getElementById('activeSessionCard').style.display = 'block';
-                logAction('SESSION', 'Sesión recuperada de storage: ' + currentSessionId);
+                logAction('SESSION', 'Sesión recuperada: ' + currentSessionId);
             }
         };
 
@@ -348,18 +348,15 @@
             document.getElementById('dispSessionId').innerText = currentSessionId ? currentSessionId.substring(0, 8) + '...' : 'Ninguna';
             document.getElementById('dispOnboarding').innerText = onbStatus === 'true' ? 'Completado' : 'Pendiente';
             
-            document.getElementById('debugFooter').innerText = `Debug: Onboarding=${onbStatus} | FirstMsg=${isFirstMessage}`;
+            document.getElementById('debugFooter').innerText = `Debug: Onb=${onbStatus} | First=${isFirstMessage}`;
             
-            // Actualizar status bar
             const statusEl = document.getElementById('statusIndicator');
             statusEl.innerText = currentSessionId ? 'Session Active' : 'Idle';
             statusEl.style.background = currentSessionId ? '#48bb78' : 'rgba(0,0,0,0.2)';
         }
 
         function showView(viewId) {
-            // Ocultar todas las vistas
             document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-            // Mostrar la deseada
             document.getElementById(viewId).classList.add('active');
             logAction('NAV', 'Navegando a ' + viewId);
         }
@@ -398,12 +395,16 @@
 
         async function startSession() {
             const btn = document.querySelector('#viewDashboard .btn-primary');
-            btn.innerHTML = "Creando sesión...";
+            btn.innerHTML = "Conectando...";
             btn.disabled = true;
 
             try {
+                // Configuración Fetch Optimizado para CORS
                 const response = await fetch(SESSION_URL, {
                     method: 'POST',
+                    mode: 'cors',         // Explícito
+                    credentials: 'omit',  // CRUCIAL: No enviar cookies para evitar conflictos con 'Allow-Origin: *'
+                    referrerPolicy: 'no-referrer', // Evitar bloqueo por referrer
                     headers: {
                         'Content-Type': 'application/json',
                         'apikey': SUPABASE_ANON_KEY,
@@ -415,21 +416,15 @@
                     })
                 });
 
-                if (!response.ok) throw new Error('Error en API Session');
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`Server Error (${response.status}): ${errText || 'Sin detalles'}`);
+                }
                 
                 const data = await response.json();
                 
-                // Asumimos que la respuesta trae el session_id. 
-                // Ajustar según la estructura real de respuesta si es necesario.
-                // Generalmente: { session_id: "...", ... } o data es el string.
-                // Como no especificaste la estructura de respuesta, asumo data.session_id o data directo.
-                currentSessionId = data.session_id || data.id || (typeof data === 'string' ? data : null);
-                
-                if (!currentSessionId) {
-                    console.warn("No se encontró session_id obvio, usando fallback o logueando data entera:", data);
-                    // Fallback para demo si la API no devuelve exactamente session_id en root
-                    if (data.data && data.data.session_id) currentSessionId = data.data.session_id;
-                }
+                // Extracción de ID robusta
+                currentSessionId = data.session_id || data.id || (data.data && data.data.session_id) || (typeof data === 'string' ? data : null);
 
                 if(currentSessionId) {
                     localStorage.setItem('claraflow_session_id', currentSessionId);
@@ -441,12 +436,17 @@
                     
                     showView('viewClarification');
                 } else {
-                    throw new Error('No se recibió Session ID válido');
+                    console.error("Respuesta completa:", data);
+                    throw new Error('La API respondió OK pero no devolvió session_id.');
                 }
 
             } catch (error) {
                 console.error(error);
-                alert("Error al crear sesión: " + error.message);
+                let msg = error.message;
+                if(msg.includes('Failed to fetch')) {
+                    msg = "Error de conexión (CORS). El servidor backend está rechazando la conexión desde este dominio.";
+                }
+                alert("Error al crear sesión:\n" + msg);
             } finally {
                 btn.innerHTML = "Iniciar Sesión de Trabajo";
                 btn.disabled = false;
@@ -461,6 +461,9 @@
             try {
                 const response = await fetch(DECIDE_URL, {
                     method: 'POST',
+                    mode: 'cors',
+                    credentials: 'omit',
+                    referrerPolicy: 'no-referrer',
                     headers: {
                         'Content-Type': 'application/json',
                         'apikey': SUPABASE_ANON_KEY,
@@ -486,8 +489,6 @@
         }
 
         // --- LÓGICA CLARIFICACIÓN & CHAT ---
-        
-        // Maneja el paso de Vista 3 a Vista 4 (Primer mensaje)
         async function handleFirstMessage() {
             const input = document.getElementById('clarificationInput');
             const text = input.value.trim();
@@ -495,29 +496,21 @@
             if (!text) return alert("Por favor escribe algo para comenzar.");
             if (!currentSessionId) return alert("Error de sesión: No hay ID de sesión activo.");
 
-            // 1. Navegar a VISTA 4
             showView('viewChat');
             
-            // 2. Crear div de chat (limpiar anterior si existe)
             const chatHistory = document.getElementById('chatHistory');
-            chatHistory.innerHTML = ''; // Limpiar historial visual previo
+            chatHistory.innerHTML = ''; 
 
-            // 3. Agregar mensaje del sistema
             addBubble('system', "Cuando quieras, dime qué es eso que ahora mismo te gustaría aclarar.");
-
-            // 4. Agregar mensaje del usuario (visual)
             addBubble('user', text);
-            input.value = ''; // Limpiar input de clarificación
+            input.value = '';
 
-            // 5. POST a IF_URL
             await postToIfLoop(text);
             
-            // 7. Marcar flag
             isFirstMessage = false;
             updateDebugInfo();
         }
 
-        // Envío de mensajes desde la Vista 4 (Chat continuo)
         async function sendChatMessage() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
@@ -530,14 +523,15 @@
             await postToIfLoop(text);
         }
 
-        // Función centralizada para llamar a la API IF Loop
         async function postToIfLoop(text) {
-            // Indicador de carga visual (opcional, pero útil)
             const loadingId = addBubble('system', 'Clara está pensando...', true);
 
             try {
                 const response = await fetch(IF_URL, {
                     method: 'POST',
+                    mode: 'cors',
+                    credentials: 'omit',
+                    referrerPolicy: 'no-referrer',
                     headers: {
                         'Content-Type': 'application/json',
                         'apikey': SUPABASE_ANON_KEY,
@@ -550,22 +544,21 @@
                     })
                 });
 
-                // Remover loading
                 const loadingEl = document.getElementById(loadingId);
                 if(loadingEl) loadingEl.remove();
 
-                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
-                // Asumiendo que la respuesta es texto plano o un JSON con campo 'message' o 'reply'
-                // Ajustar según respuesta real. Usaremos JSON.stringify si es objeto complejo para debug.
                 let replyText = "Respuesta vacía";
                 if (typeof data === 'string') replyText = data;
                 else if (data.message) replyText = data.message;
                 else if (data.reply) replyText = data.reply;
                 else if (data.text) replyText = data.text;
-                else replyText = JSON.stringify(data); // Fallback
+                else replyText = JSON.stringify(data);
 
                 addBubble('bot', replyText);
 
@@ -574,11 +567,14 @@
                 if(loadingEl) loadingEl.remove();
                 
                 console.error(error);
-                addBubble('error', 'Error de conexión: ' + error.message);
+                let displayError = 'Error de conexión: ' + error.message;
+                if(error.message.includes('Failed to fetch')) {
+                    displayError = "Bloqueo de seguridad (CORS). El backend no permitió la respuesta.";
+                }
+                addBubble('error', displayError);
             }
         }
 
-        // Helper para crear burbujas de chat
         function addBubble(type, text, isTemp = false) {
             const history = document.getElementById('chatHistory');
             const div = document.createElement('div');
