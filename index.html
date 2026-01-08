@@ -1,1414 +1,606 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ClaraFlow</title>
-  <style>
-    :root{
-      --bg1:#667eea;
-      --bg2:#764ba2;
-      --card:#ffffff;
-      --text:#1f2937;
-      --muted:#6b7280;
-      --border:rgba(255,255,255,.22);
-      --shadow:0 18px 45px rgba(0,0,0,.22);
-      --shadow2:0 10px 28px rgba(0,0,0,.18);
-      --radius:18px;
-      --radius2:14px;
-      --btn:#111827;
-      --btnText:#ffffff;
-      --btn2:#ffffff;
-      --btn2Text:#111827;
-      --danger:#ef4444;
-      --success:#10b981;
-      --warn:#f59e0b;
-      --focus:rgba(102,126,234,.35);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      --maxw: 980px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClaraFlow - Decisiones Claras</title>
+    <style>
+        /* RESET & BASE */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            padding: 10px;
+        }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:var(--sans);
-      color:var(--text);
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-    }
+        /* LAYOUT & GLASSMORPHISM */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 90vh;
+            max-height: 850px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
 
-    .app{
-      width: min(var(--maxw), 100%);
-      min-height: 560px;
-      background: rgba(255,255,255,.10);
-      border: 1px solid var(--border);
-      border-radius: 26px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      backdrop-filter: blur(10px);
-    }
+        /* TOPBAR */
+        .topbar {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-area h1 { font-size: 1.2rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .logo-area p { font-size: 0.75rem; color: rgba(255,255,255,0.9); }
+        .status-badge {
+            font-size: 0.7rem;
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-family: monospace;
+        }
 
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 16px 18px;
-      border-bottom: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.08);
-    }
+        /* MAIN CONTENT AREA */
+        .view-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+        }
+        .view-container.active { display: flex; }
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap: 12px;
-      color: white;
-    }
+        /* BUTTONS & INPUTS */
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        button:active { transform: scale(0.98); }
+        
+        .btn-primary {
+            background: #fff;
+            color: #667eea;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 18px;
+            width: 100%;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.3);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        .btn-text {
+            background: transparent;
+            color: #eee;
+            text-decoration: underline;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+        .btn-disabled { opacity: 0.5; pointer-events: none; }
 
-    .logo{
-      width:38px;
-      height:38px;
-      border-radius: 12px;
-      background: rgba(255,255,255,.22);
-      display:grid;
-      place-items:center;
-      box-shadow: 0 10px 18px rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.25);
-      user-select:none;
-    }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.6);
+            font-family: inherit;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        input:focus, textarea:focus { outline: none; background: rgba(255,255,255,0.9); }
 
-    .brand h1{
-      margin:0;
-      font-size: 16px;
-      line-height: 1.2;
-      letter-spacing: .2px;
-    }
+        /* VISTA 1: ONBOARDING */
+        #viewOnboarding { justify-content: center; text-align: center; color: #fff; }
+        .onboarding-step { display: none; animation: fadeIn 0.5s ease; }
+        .onboarding-step.active-step { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .step-counter { font-size: 0.8rem; opacity: 0.8; margin-bottom: 10px; }
+        .onboarding-title { font-size: 1.8rem; margin-bottom: 10px; }
+        .onboarding-text { font-size: 1.1rem; line-height: 1.5; margin-bottom: 20px; max-width: 90%; }
+        .onboarding-list { text-align: left; list-style: none; margin-bottom: 20px; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 16px; }
+        .onboarding-list li { margin-bottom: 8px; display: flex; align-items: center; }
+        .onboarding-list li::before { content: "✓"; margin-right: 10px; font-weight: bold; }
 
-    .brand .sub{
-      font-size: 12px;
-      opacity: .86;
-      margin-top: 2px;
-    }
+        /* VISTA 2: DASHBOARD */
+        .dashboard-card {
+            background: rgba(255,255,255,0.5);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .dashboard-title { font-size: 1.2rem; margin-bottom: 15px; color: #4a5568; font-weight: bold; }
+        .info-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 5px; }
+        .info-label { color: #666; }
+        .info-val { font-family: monospace; color: #333; }
 
-    .status{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      color: rgba(255,255,255,.92);
-      font-size: 12px;
-    }
+        /* VISTA 3: CLARIFICACION */
+        #viewClarification { justify-content: center; }
+        .clarify-card {
+            background: rgba(255,255,255,0.8);
+            padding: 25px;
+            border-radius: 22px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .clarify-title { font-size: 1.5rem; color: #2d3748; margin-bottom: 10px; }
+        .clarify-desc { color: #4a5568; margin-bottom: 20px; line-height: 1.4; }
 
-    .pill{
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.18);
-      border: 1px solid rgba(255,255,255,.18);
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      white-space:nowrap;
-    }
+        /* VISTA 4: CHAT */
+        #viewChat { padding: 0; display: none; flex-direction: column; height: 100%; }
+        .chat-history {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .chat-input-area {
+            padding: 15px;
+            background: rgba(255,255,255,0.6);
+            border-top: 1px solid rgba(255,255,255,0.3);
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* CHAT BUBBLES */
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; line-height: 1.4; font-size: 0.95rem; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .msg-user { align-self: flex-end; background: #4c51bf; color: white; border-bottom-right-radius: 4px; }
+        .msg-bot { align-self: flex-start; background: #fff; color: #333; border-bottom-left-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .msg-system { align-self: center; background: rgba(254, 252, 191, 0.9); color: #744210; font-size: 0.85rem; text-align: center; border: 1px solid rgba(246, 224, 94, 0.5); width: 90%; }
+        .msg-error { background: #fed7d7; color: #742a2a; align-self: center; width: 90%; text-align: center; border: 1px solid #fc8181; }
 
-    .dot{
-      width:8px;height:8px;border-radius:50%;
-      background: rgba(255,255,255,.65);
-      box-shadow: 0 0 0 2px rgba(255,255,255,.12);
-    }
+        /* FOOTER */
+        .footer {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.7);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
 
-    .dot.ok{ background: var(--success); }
-    .dot.warn{ background: var(--warn); }
-    .dot.bad{ background: var(--danger); }
-
-    .main{
-      display:flex;
-      gap: 18px;
-      padding: 18px;
-      flex:1;
-      min-height: 0;
-    }
-
-    .panel{
-      flex:1;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow2);
-      min-height: 0;
-    }
-
-    .panel h2{
-      margin: 0 0 8px 0;
-      font-size: 18px;
-      color: white;
-      letter-spacing: .2px;
-    }
-
-    .panel p{
-      margin: 0 0 14px 0;
-      color: rgba(255,255,255,.88);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .card{
-      background: rgba(255,255,255,.95);
-      border-radius: var(--radius2);
-      padding: 14px;
-      border: 1px solid rgba(0,0,0,.06);
-      box-shadow: 0 12px 26px rgba(0,0,0,.12);
-      color: var(--text);
-    }
-
-    .views{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-    }
-
-    .view{
-      display:none;
-      flex:1;
-      min-height:0;
-    }
-    .view.active{ display:flex; }
-
-    .ob-wrap{
-      width:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .ob-card{
-      width: min(720px, 100%);
-      background: rgba(255,255,255,.95);
-      border-radius: 22px;
-      padding: 20px 18px;
-      border: 1px solid rgba(0,0,0,.06);
-      box-shadow: 0 18px 45px rgba(0,0,0,.18);
-    }
-
-    .ob-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .ob-title{
-      margin:0;
-      font-size: 20px;
-      letter-spacing: .2px;
-    }
-
-    .ob-step{
-      font-family: var(--mono);
-      font-size: 12px;
-      color: rgba(0,0,0,.55);
-      background: rgba(0,0,0,.06);
-      border: 1px solid rgba(0,0,0,.08);
-      padding: 6px 10px;
-      border-radius: 999px;
-      user-select:none;
-    }
-
-    .ob-body{
-      color: rgba(0,0,0,.78);
-      font-size: 14px;
-      line-height: 1.55;
-      margin: 10px 0 14px 0;
-    }
-
-    .ob-list{
-      margin: 10px 0 0 18px;
-      padding:0;
-    }
-    .ob-list li{ margin: 6px 0; }
-
-    .ob-actions{
-      display:flex;
-      justify-content:flex-end;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .dash-grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 18px;
-      width:100%;
-      min-height:0;
-    }
-    @media (max-width: 860px){
-      .main{ flex-direction:column; }
-      .dash-grid{ grid-template-columns: 1fr; }
-    }
-
-    .section{
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-    }
-
-    .row{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items:center;
-    }
-
-    .hint{
-      font-size: 12px;
-      color: rgba(0,0,0,.60);
-      line-height:1.4;
-    }
-
-    .kv{
-      display:grid;
-      grid-template-columns: 130px 1fr;
-      gap: 8px 10px;
-      font-size: 12px;
-      color: rgba(0,0,0,.72);
-      border: 1px dashed rgba(0,0,0,.12);
-      border-radius: 12px;
-      padding: 12px;
-      background: rgba(255,255,255,.7);
-    }
-    .kv .k{ color: rgba(0,0,0,.52); }
-    .kv code{
-      font-family: var(--mono);
-      font-size: 12px;
-      padding: 2px 6px;
-      border-radius: 8px;
-      background: rgba(0,0,0,.06);
-      border: 1px solid rgba(0,0,0,.06);
-      overflow-wrap:anywhere;
-    }
-
-    .clarify{
-      width:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 6px 0;
-    }
-
-    .clarify-card{
-      width: min(820px, 100%);
-      background: rgba(255,255,255,.95);
-      border-radius: 22px;
-      padding: 18px;
-      border: 1px solid rgba(0,0,0,.06);
-      box-shadow: 0 18px 45px rgba(0,0,0,.18);
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-    }
-
-    .clarify-card h2{
-      margin:0;
-      font-size: 20px;
-    }
-
-    .clarify-card p{
-      margin:0;
-      color: rgba(0,0,0,.75);
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    .chat{
-      width:100%;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-      gap: 12px;
-    }
-
-    .chat-card{
-      flex:1;
-      min-height:0;
-      background: rgba(255,255,255,.95);
-      border-radius: 22px;
-      padding: 14px;
-      border: 1px solid rgba(0,0,0,.06);
-      box-shadow: 0 18px 45px rgba(0,0,0,.18);
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-    }
-
-    .chat-top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-    }
-    .chat-top h2{
-      margin:0;
-      font-size: 18px;
-    }
-
-    .chatlog{
-      flex:1;
-      min-height: 0;
-      overflow:auto;
-      padding: 10px;
-      border-radius: 16px;
-      background: rgba(0,0,0,.03);
-      border: 1px solid rgba(0,0,0,.06);
-    }
-
-    .msg{
-      display:flex;
-      margin: 10px 0;
-      gap: 10px;
-      align-items:flex-start;
-    }
-    .msg .avatar{
-      width:34px;
-      height:34px;
-      border-radius: 12px;
-      display:grid;
-      place-items:center;
-      font-size: 14px;
-      border: 1px solid rgba(0,0,0,.08);
-      user-select:none;
-      flex: 0 0 auto;
-    }
-    .msg.user .avatar{ background: rgba(17,24,39,.10); }
-    .msg.bot .avatar{ background: rgba(102,126,234,.14); }
-    .msg.system .avatar{ background: rgba(245,158,11,.16); }
-
-    .bubble{
-      max-width: 82%;
-      padding: 10px 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(0,0,0,.08);
-      background: white;
-      font-size: 14px;
-      line-height: 1.45;
-      white-space: pre-wrap;
-      overflow-wrap:anywhere;
-    }
-    .msg.user .bubble{
-      background: rgba(17,24,39,.92);
-      color:white;
-      border-color: rgba(17,24,39,.92);
-      margin-left:auto;
-    }
-    .msg.user{ flex-direction: row-reverse; }
-    .msg.user .bubble{ border-top-right-radius: 8px; }
-    .msg.bot .bubble{ border-top-left-radius: 8px; }
-    .msg.system .bubble{
-      background: rgba(245,158,11,.10);
-      border-color: rgba(245,158,11,.25);
-      color: rgba(0,0,0,.78);
-    }
-
-    .composer{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-    }
-
-    input[type="text"]{
-      width:100%;
-      border-radius: 14px;
-      border: 1px solid rgba(0,0,0,.12);
-      padding: 12px 12px;
-      font-size: 14px;
-      outline:none;
-      background: rgba(255,255,255,.96);
-      transition: box-shadow .15s ease, border-color .15s ease;
-    }
-    input[type="text"]:focus{
-      border-color: rgba(102,126,234,.45);
-      box-shadow: 0 0 0 4px var(--focus);
-    }
-
-    .btn{
-      appearance:none;
-      border: 1px solid rgba(0,0,0,.12);
-      border-radius: 999px;
-      padding: 10px 14px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor:pointer;
-      transition: transform .08s ease, box-shadow .15s ease, background .15s ease, opacity .15s ease;
-      user-select:none;
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      white-space:nowrap;
-    }
-    .btn:active{ transform: translateY(1px); }
-
-    .btn-primary{
-      background: var(--btn);
-      color: var(--btnText);
-      border-color: rgba(0,0,0,.18);
-      box-shadow: 0 10px 22px rgba(0,0,0,.18);
-    }
-    .btn-primary:hover{ box-shadow: 0 14px 28px rgba(0,0,0,.22); }
-
-    .btn-secondary{
-      background: var(--btn2);
-      color: var(--btn2Text);
-    }
-    .btn-secondary:hover{ box-shadow: 0 14px 28px rgba(0,0,0,.12); }
-
-    .btn:disabled{
-      opacity: .55;
-      cursor:not-allowed;
-      transform:none;
-      box-shadow:none;
-    }
-
-    .mini{
-      font-size: 12px;
-      padding: 8px 12px;
-      border-radius: 999px;
-    }
-
-    .toast{
-      position: fixed;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(17,24,39,.94);
-      color: white;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 18px 45px rgba(0,0,0,.25);
-      display:none;
-      max-width: min(720px, calc(100% - 26px));
-      font-size: 13px;
-      line-height: 1.35;
-      z-index: 9999;
-    }
-    .toast.show{ display:block; }
-
-    .footer{
-      padding: 12px 18px;
-      border-top: 1px solid rgba(255,255,255,.18);
-      color: rgba(255,255,255,.82);
-      font-size: 12px;
-      display:flex;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-    }
-
-    .footer code{
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      background: rgba(0,0,0,.18);
-      border: 1px solid rgba(255,255,255,.14);
-      overflow-wrap:anywhere;
-    }
-
-    .sr-only{
-      position:absolute;
-      width:1px;height:1px;
-      padding:0;margin:-1px;
-      overflow:hidden;
-      clip:rect(0,0,0,0);
-      white-space:nowrap;border:0;
-    }
-  </style>
+        /* ANIMATIONS */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        
+        .hidden { display: none !important; }
+    </style>
 </head>
-
 <body>
-  <div class="app" id="appRoot">
 
-    <div class="topbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true">CF</div>
-        <div>
-          <h1>ClaraFlow</h1>
-          <div class="sub">Decisiones claras, paso a paso</div>
-        </div>
-      </div>
-
-      <div class="status">
-        <div class="pill" title="Estado de la app">
-          <span class="dot" id="statusDot"></span>
-          <span id="statusText">Listo</span>
-        </div>
-        <div class="pill" title="Usuario / Sesión">
-          <span>user:</span>
-          <code id="userCode">-</code>
-          <span>session:</span>
-          <code id="sessionCode">-</code>
-        </div>
-      </div>
-    </div>
-
-    <div class="main">
-      <div class="views">
-
-        <!-- VIEW: ONBOARDING -->
-        <section class="view" id="viewOnboarding" aria-label="Onboarding">
-          <div class="ob-wrap">
-            <div class="ob-card">
-              <div class="ob-head">
-                <h2 class="ob-title" id="obTitle">—</h2>
-                <div class="ob-step" id="obStep">Paso 1/4</div>
-              </div>
-              <div class="ob-body" id="obBody">—</div>
-
-              <div class="ob-actions" id="obActions">
-                <button class="btn btn-primary" id="btn-continuar">Continuar</button>
-                <button class="btn btn-primary" id="btn-siguiente" style="display:none">Siguiente</button>
-                <button class="btn btn-primary" id="btn-entendido" style="display:none">Entendido</button>
-                <button class="btn btn-primary" id="btn-comenzar" style="display:none">Comenzar</button>
-              </div>
+    <div class="app-container">
+        <div class="topbar">
+            <div class="logo-area">
+                <h1>CF ClaraFlow</h1>
+                <p>Decisiones claras, paso a paso</p>
             </div>
-          </div>
-        </section>
+            <div class="status-badge" id="statusIndicator">Ready</div>
+        </div>
 
-        <!-- VIEW: DASHBOARD -->
-        <section class="view" id="viewDashboard" aria-label="Dashboard">
-          <div class="dash-grid">
-            <div class="panel">
-              <h2>Dashboard</h2>
-              <p>Gestiona tus sesiones y registra decisiones. El flujo se activa al iniciar una sesión y enviar el primer mensaje de clarificación.</p>
-
-              <div class="card section">
-                <h3 style="margin:0 0 2px 0; font-size:16px;">1) Crear nueva sesión</h3>
-                <div class="hint">
-                  Crea una sesión de trabajo en el backend. Al completarse, pasarás a la pantalla de clarificación.
-                </div>
-                <div class="row">
-                  <button class="btn btn-primary" id="createSession">Iniciar Sesión de Trabajo</button>
-                  <button class="btn btn-secondary" id="resetApp" title="Reiniciar onboarding y estado (solo local)">Reset local</button>
-                </div>
-
-                <div class="kv" style="margin-top:8px;">
-                  <div class="k">user_id</div>
-                  <div><code id="kvUserId">—</code></div>
-                  <div class="k">session_id</div>
-                  <div><code id="kvSessionId">—</code></div>
-                  <div class="k">onboarding</div>
-                  <div><code id="kvOnboarding">—</code></div>
-                </div>
-              </div>
-
-              <div class="card section">
-                <h3 style="margin:0 0 2px 0; font-size:16px;">2) Registrar decisión</h3>
-                <div class="hint">
-                  Disponible una vez exista <span style="font-family:var(--mono)">session_id</span>.
-                </div>
-                <div class="row">
-                  <button class="btn btn-primary" id="makeDecision" disabled>Registrar Decisión</button>
-                  <span class="hint" id="decisionStatus" aria-live="polite"></span>
-                </div>
-              </div>
+        <div id="viewOnboarding" class="view-container">
+            <div class="onboarding-step active-step" id="step1">
+                <div class="step-counter">Paso 1/4</div>
+                <h2 class="onboarding-title">¡Bienvenido a ClaraFlow! 🎯</h2>
+                <p class="onboarding-text">ClaraFlow te ayuda a tomar decisiones claras y organizadas mediante un sistema inteligente de flujo de trabajo.</p>
+                <button class="btn-primary" onclick="nextStep(2)">Continuar</button>
             </div>
 
-            <div class="panel">
-              <h2>Estado</h2>
-              <p>Visibilidad para depuración (solo UI). No se muestran JSON de respuestas al usuario.</p>
-
-              <div class="card section">
-                <h3 style="margin:0 0 6px 0; font-size:16px;">Accesos rápidos</h3>
-                <div class="row">
-                  <button class="btn btn-secondary mini" id="goToClarification" disabled>Ir a clarificación</button>
-                  <button class="btn btn-secondary mini" id="goToChat" disabled>Ir al chat</button>
-                </div>
-                <div class="hint" style="margin-top:6px;">
-                  El chat aparece tras el primer mensaje en clarificación.
-                </div>
-              </div>
-
-              <div class="card section">
-                <h3 style="margin:0 0 6px 0; font-size:16px;">Diagnóstico</h3>
-                <div class="hint">
-                  Si algún botón no responde, abre la consola del navegador y revisa los logs (se imprimen en cada acción).
-                </div>
-                <div class="hint" style="margin-top:8px;">
-                  Consejo: prueba primero “Iniciar Sesión de Trabajo” y luego escribe un mensaje en clarificación.
-                </div>
-              </div>
+            <div class="onboarding-step" id="step2">
+                <div class="step-counter">Paso 2/4</div>
+                <h2 class="onboarding-title">¿Cómo funciona? 🤔</h2>
+                <ul class="onboarding-list">
+                    <li>Crea una sesión de trabajo</li>
+                    <li>Define tu decisión</li>
+                    <li>Sigue el flujo guiado</li>
+                    <li>Obtén claridad en tus decisiones</li>
+                </ul>
+                <button class="btn-primary" onclick="nextStep(3)">Siguiente</button>
             </div>
-          </div>
-        </section>
 
-        <!-- VIEW: CLARIFICATION -->
-        <section class="view" id="viewClarification" aria-label="Clarificación">
-          <div class="clarify">
+            <div class="onboarding-step" id="step3">
+                <div class="step-counter">Paso 3/4</div>
+                <h2 class="onboarding-title">Tu privacidad importa 🔒</h2>
+                <p class="onboarding-text">Todas tus decisiones se guardan de forma segura. Solo tú tienes acceso a tu información.</p>
+                <button class="btn-primary" onclick="nextStep(4)">Entendido</button>
+            </div>
+
+            <div class="onboarding-step" id="step4">
+                <div class="step-counter">Paso 4/4</div>
+                <h2 class="onboarding-title">¡Listo para empezar! 🚀</h2>
+                <p class="onboarding-text">Vamos a comenzar tu primera sesión de ClaraFlow.</p>
+                <button class="btn-primary" onclick="finishOnboarding()">Comenzar</button>
+            </div>
+        </div>
+
+        <div id="viewDashboard" class="view-container">
+            <div class="dashboard-card">
+                <h3 class="dashboard-title">Nueva Sesión</h3>
+                <p style="margin-bottom:15px; color:#666;">Inicia un nuevo ciclo de pensamiento.</p>
+                <button class="btn-primary" onclick="startSession()">Iniciar Sesión de Trabajo</button>
+            </div>
+
+            <div class="dashboard-card" id="activeSessionCard" style="display:none; border-left: 4px solid #48bb78;">
+                <h3 class="dashboard-title">Sesión Activa</h3>
+                <button class="btn-primary" onclick="showView('viewClarification')">Ir a Clarificación</button>
+            </div>
+
+            <div class="dashboard-card">
+                <h3 class="dashboard-title">Diagnóstico</h3>
+                <div class="info-row">
+                    <span class="info-label">User ID:</span>
+                    <span class="info-val" id="dispUserId">...</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Session ID:</span>
+                    <span class="info-val" id="dispSessionId">Ninguna</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Onboarding:</span>
+                    <span class="info-val" id="dispOnboarding">...</span>
+                </div>
+                <button class="btn-secondary" style="width:100%; margin-top:15px; background: rgba(229, 62, 62, 0.2); color: #c53030;" onclick="resetLocal()">Reset Local & Reload</button>
+            </div>
+
+            <div id="decisionArea" class="dashboard-card hidden">
+                <h3 class="dashboard-title">Registrar Decisión Final</h3>
+                <input type="text" id="decisionText" placeholder="Decisión final tomada...">
+                <button class="btn-primary" onclick="registerDecision()">Registrar Decisión</button>
+            </div>
+        </div>
+
+        <div id="viewClarification" class="view-container">
             <div class="clarify-card">
-              <h2>Aclaremos una cosa</h2>
-              <p>
-                No hace falta contarlo todo. Piensa en una situación, decisión o asunto concreto que ahora mismo te genera ruido.
-                Vamos a mirarlo con calma para ganar un poco más de claridad.
-              </p>
-
-              <div class="composer">
-                <label class="sr-only" for="ifInput">Mensaje</label>
-                <input id="ifInput" type="text" placeholder="Cuéntame qué está pasando..." />
-                <button class="btn btn-primary" id="ifSendBtn">Enviar</button>
-              </div>
-
-              <div class="hint">
-                Al enviar el primer mensaje, se abrirá el historial del chat y se enviará al backend.
-              </div>
+                <h2 class="clarify-title">Aclaremos una cosa</h2>
+                <p class="clarify-desc">No hace falta contarlo todo. Piensa en una situación, decisión o asunto concreto que ahora mismo te genera ruido. Vamos a mirarlo con calma para ganar un poco más de claridad.</p>
+                
+                <textarea id="clarificationInput" rows="4" placeholder="Cuéntame qué está pasando..."></textarea>
+                
+                <button class="btn-primary" id="btnSendClarification" onclick="handleFirstMessage()">Enviar</button>
+                <button class="btn-text" onclick="showView('viewDashboard')">Volver al Dashboard</button>
             </div>
-          </div>
-        </section>
+        </div>
 
-        <!-- VIEW: IF LOOP CHAT -->
-        <section class="view" id="viewChat" aria-label="Chat IF Loop">
-          <div class="chat">
-            <div class="chat-card">
-              <div class="chat-top">
-                <h2>IF Loop</h2>
-                <div class="row">
-                  <button class="btn btn-secondary mini" id="backToDashboard">Dashboard</button>
-                  <button class="btn btn-secondary mini" id="backToClarification">Clarificación</button>
+        <div id="viewChat" class="view-container">
+            <div class="chat-history" id="chatHistory">
                 </div>
-              </div>
-
-              <div class="chatlog" id="ifChat" style="display:none"></div>
-
-              <div class="composer">
-                <label class="sr-only" for="chatInput">Escribe un mensaje</label>
-                <input id="chatInput" type="text" placeholder="Escribe aquí..." />
-                <button class="btn btn-primary" id="chatSendBtn">Enviar</button>
-              </div>
-
-              <div class="hint">
-                Se envía al backend y se muestra solo el <span style="font-family:var(--mono)">reply</span> de la respuesta.
-              </div>
+            
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Escribe tu mensaje..." onkeypress="handleEnter(event)">
+                <button class="btn-primary" style="width: auto; padding: 10px 20px;" onclick="sendChatMessage()">Enviar</button>
             </div>
-          </div>
-        </section>
+            <div style="text-align:center; padding-bottom:10px; background: rgba(255,255,255,0.6);">
+                <button class="btn-text" style="color: #555; font-size: 0.75rem;" onclick="showView('viewClarification')">Volver a Clarificación</button>
+                <button class="btn-text" style="color: #555; font-size: 0.75rem; margin-left: 10px;" onclick="showView('viewDashboard')">Volver al Dashboard</button>
+            </div>
+        </div>
 
-      </div>
+        <div class="footer">
+            <p>ClaraFlow • Single-file HTML • Sin dependencias</p>
+            <p style="opacity: 0.6; margin-top: 4px;" id="debugFooter">Debug: Loading...</p>
+        </div>
     </div>
 
-    <div class="footer">
-      <div>ClaraFlow • Single-file HTML • Sin dependencias</div>
-      <div>
-        <span>Onboarding:</span> <code id="footerOnboarding">—</code>
-        <span style="margin-left:10px;">FirstMsg:</span> <code id="footerFirstMsg">—</code>
-      </div>
-    </div>
+    <script>
+        // --- CONSTANTES DEL BACKEND ---
+        const SESSION_URL = 'https://claramente-edge-prod.vercel.app/api/clara-flow-session';
+        const IF_URL = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
+        const DECIDE_URL = 'https://claramente-edge-prod.vercel.app/api/claraflow-decide';
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRramVwc3FncXRqbWlieGdhaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30.YH0RfmwXc3FncXRQqbHlidGdhX1pEzNTI3NzcyNy1jYzE2LTQ0YjgtYmZjMi1iZTEzMDg3N2Y3ZmE";
 
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  </div>
+        // --- VARIABLES GLOBALES ---
+        let currentSessionId = null;
+        let currentUserId = localStorage.getItem('claraflow_userid') || 'demo-user-' + Date.now();
+        // Guardamos el usuario para persistencia básica
+        if(!localStorage.getItem('claraflow_userid')) {
+            localStorage.setItem('claraflow_userid', currentUserId);
+        }
 
-  <script>
-    /**************************************************************************
-     * ClaraFlow - Single file HTML app (CORREGIDO)
-     * Fixes incluidos:
-     * 1) SUPABASE_ANON_KEY corregida (según reporte)
-     * 2) user_id incluido en payload IF y DECIDE (ya estaba, se mantiene explícito)
-     * 3) extracción de session_id más robusta y logs de respuesta
-     *************************************************************************/
+        let isFirstMessage = true;
 
-    /* ===========================
-       Backend constants
-    =========================== */
-    const SESSION_URL = 'https://claramente-edge-prod.vercel.app/api/clara-flow-session';
-    const IF_URL      = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
-    const DECIDE_URL  = 'https://claramente-edge-prod.vercel.app/api/claraflow-decide';
-
-    // FIX 1: Key correcta (la del reporte)
-    const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRramVwc3FncXRqbWlieGdhaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30.YH0RfmwXc3FncXRQqbHlidGdhX1pEzNTI3NzcyNy1jYzE2LTQ0YjgtYmZjMi1iZTEzMDg3N2Y3ZmE";
-
-    /* ===========================
-       Global variables (required)
-    =========================== */
-    let" currentSessionId = null;"
-    let currentUserId = 'demo-user-' + Date.now();
-    let isFirstMessage = true;
-
-    /* ===========================
-       DOM references
-    =========================== */
-    let viewOnboarding, viewDashboard, viewClarification, viewChat;
-    let obTitle, obBody, obStep;
-    let btnContinuar, btnSiguiente, btnEntendido, btnComenzar;
-
-    let btnCreateSession, btnMakeDecision, btnResetApp;
-    let decisionStatus;
-    let goToClarification, goToChat;
-
-    let kvUserId, kvSessionId, kvOnboarding;
-    let ifInput, ifSendBtn;
-
-    let ifChat, chatInput, chatSendBtn;
-    let backToDashboard, backToClarification;
-
-    let statusDot, statusText, userCode, sessionCode;
-    let footerOnboarding, footerFirstMsg;
-    let toastEl;
-
-    /* ===========================
-       State helpers
-    =========================== */
-    function log(){
-      console.log.apply(console, arguments);
-    }
-
-    function setStatus(kind, text){
-      log('[STATUS]', kind, text);
-      statusText.textContent = text || '—';
-      statusDot.classList.remove('ok','warn','bad');
-      if(kind === 'ok') statusDot.classList.add('ok');
-      else if(kind === 'warn') statusDot.classList.add('warn');
-      else if(kind === 'bad') statusDot.classList.add('bad');
-    }
-
-    function showToast(message, ms){
-      if(!toastEl) return;
-      toastEl.textContent = message || '';
-      toastEl.classList.add('show');
-      window.clearTimeout(showToast._t);
-      showToast._t = window.setTimeout(function(){
-        toastEl.classList.remove('show');
-      }, typeof ms === 'number' ? ms : 2600);
-    }
-
-    function safeText(s){
-      if(s === null || s === undefined) return '';
-      return String(s);
-    }
-
-    function updateHeaderCodes(){
-      userCode.textContent = currentUserId ? currentUserId : '-';
-      sessionCode.textContent = currentSessionId ? currentSessionId : '-';
-    }
-
-    function isOnboardingComplete(){
-      return localStorage.getItem('claraflow_onboarding_complete') === 'true';
-    }
-
-    function setOnboardingComplete(){
-      localStorage.setItem('claraflow_onboarding_complete', 'true');
-      log('[ONBOARDING] set claraflow_onboarding_complete = true');
-      updateDashboardKV();
-    }
-
-    function updateDashboardKV(){
-      kvUserId.textContent = currentUserId || '—';
-      kvSessionId.textContent = currentSessionId || '—';
-      kvOnboarding.textContent = isOnboardingComplete() ? 'true' : 'false';
-
-      footerOnboarding.textContent = isOnboardingComplete() ? 'true' : 'false';
-      footerFirstMsg.textContent = isFirstMessage ? 'true' : 'false';
-
-      btnMakeDecision.disabled = !currentSessionId;
-      goToClarification.disabled = !currentSessionId;
-      goToChat.disabled = isFirstMessage;
-
-      updateHeaderCodes();
-    }
-
-    function resetLocal(){
-      log('[RESET] Clearing local onboarding + resetting session/firstMessage');
-      localStorage.removeItem('claraflow_onboarding_complete');
-      currentSessionId = null;
-      isFirstMessage = true;
-      ifChat.innerHTML = '';
-      ifChat.style.display = 'none';
-      decisionStatus.textContent = '';
-      chatInput.value = '';
-      ifInput.value = '';
-      updateDashboardKV();
-      setStatus('warn','Estado reiniciado (local)');
-      showToast('Estado local reiniciado');
-      showView('onboarding');
-      renderOnboardingStep(1);
-    }
-
-    /* ===========================
-       View management
-    =========================== */
-    function showView(name){
-      log('[NAV] showView:', name);
-      viewOnboarding.classList.remove('active');
-      viewDashboard.classList.remove('active');
-      viewClarification.classList.remove('active');
-      viewChat.classList.remove('active');
-
-      if(name === 'onboarding') viewOnboarding.classList.add('active');
-      else if(name === 'dashboard') viewDashboard.classList.add('active');
-      else if(name === 'clarification') viewClarification.classList.add('active');
-      else if(name === 'chat') viewChat.classList.add('active');
-      else viewDashboard.classList.add('active');
-
-      updateDashboardKV();
-    }
-
-    /* ===========================
-       Onboarding
-    =========================== */
-    const onboardingSteps = {
-      1: {
-        title: '¡Bienvenido a ClaraFlow! 🎯',
-        body: 'ClaraFlow te ayuda a tomar decisiones claras y organizadas mediante un sistema inteligente de flujo de trabajo.',
-        btnToShow: 'btn-continuar'
-      },
-      2: {
-        title: '¿Cómo funciona? 🤔',
-        body: (
-          '<ol class="ob-list">' +
-            '<li>Crea una sesión de trabajo</li>' +
-            '<li>Define tu decisión</li>' +
-            '<li>Sigue el flujo guiado</li>' +
-            '<li>Obtén claridad en tus decisiones</li>' +
-          '</ol>'
-        ),
-        btnToShow: 'btn-siguiente'
-      },
-      3: {
-        title: 'Tu privacidad importa 🔒',
-        body: 'Todas tus decisiones se guardan de forma segura. Solo tú tienes acceso a tu información.',
-        btnToShow: 'btn-entendido'
-      },
-      4: {
-        title: '¡Listo para empezar! 🚀',
-        body: 'Vamos a comenzar tu primera sesión de ClaraFlow.',
-        btnToShow: 'btn-comenzar'
-      }
-    };
-
-    function renderOnboardingStep(step){
-      log('[ONBOARDING] render step', step);
-      const s = onboardingSteps[step];
-      if(!s){ log('[ONBOARDING] invalid step', step); return; }
-
-      obTitle.textContent = s.title;
-      if(step === 2) obBody.innerHTML = s.body;
-      else obBody.textContent = s.body;
-
-      obStep.textContent = 'Paso ' + step + '/4';
-
-      btnContinuar.style.display = 'none';
-      btnSiguiente.style.display = 'none';
-      btnEntendido.style.display = 'none';
-      btnComenzar.style.display = 'none';
-
-      if(s.btnToShow === 'btn-continuar') btnContinuar.style.display = 'inline-flex';
-      if(s.btnToShow === 'btn-siguiente') btnSiguiente.style.display = 'inline-flex';
-      if(s.btnToShow === 'btn-entendido') btnEntendido.style.display = 'inline-flex';
-      if(s.btnToShow === 'btn-comenzar') btnComenzar.style.display = 'inline-flex';
-    }
-
-    /* ===========================
-       Networking helpers
-    =========================== */
-    async function postJson(url, headers, bodyObj){
-      log('[HTTP] POST', url, bodyObj);
-
-      let resp;
-      try{
-        resp = await fetch(url, {
-          method: 'POST',
-          headers: headers,
-          body: JSON.stringify(bodyObj)
-        });
-      }catch(netErr){
-        log('[HTTP] Network error:', netErr);
-        throw new Error('Error de red. Revisa tu conexión o CORS.');
-      }
-
-      let text = '';
-      try{ text = await resp.text(); }catch(e){}
-
-      let json = null;
-      if(text){
-        try{ json = JSON.parse(text); }catch(e){ json = null; }
-      }
-
-      log('[HTTP] Response status:', resp.status, resp.statusText);
-      if(text) log('[HTTP] Raw response body:', text);
-
-      if(!resp.ok){
-        const serverMsg = (json && (json.error || json.message)) ? (json.error || json.message) : '';
-        const msg = 'HTTP ' + resp.status + ' ' + resp.statusText + (serverMsg ? ' — ' + serverMsg : '');
-        log('[HTTP] Error response:', msg);
-        throw new Error(msg);
-      }
-
-      return json !== null ? json : {};
-    }
-
-    /* ===========================
-       Session creation
-    =========================== */
-    function extractSessionId(data){
-      // FIX 3: extracción más robusta + logs
-      // Probables:
-      // - data.session_id
-      // - data.sessionId
-      // - data.id
-      // - data.session?.id
-      // - data.data?.session_id (si envoltorio)
-      log('[SESSION] extractSessionId from:', data);
-
-      if(!data) return null;
-
-      if(typeof data.session_id === 'string' && data.session_id) return data.session_id;
-      if(typeof data.sessionId === 'string' && data.sessionId) return data.sessionId;
-      if(typeof data.id === 'string' && data.id) return data.id;
-
-      if(data.session && typeof data.session.id === 'string' && data.session.id) return data.session.id;
-      if(data.data && typeof data.data.session_id === 'string' && data.data.session_id) return data.data.session_id;
-      if(data.data && typeof data.data.sessionId === 'string' && data.data.sessionId) return data.data.sessionId;
-      if(data.data && typeof data.data.id === 'string' && data.data.id) return data.data.id;
-
-      return null;
-    }
-
-    async function handleCreateSession(){
-      log('[ACTION] createSession clicked');
-      setStatus('warn','Creando sesión...');
-      showToast('Creando sesión...');
-      btnCreateSession.disabled = true;
-
-      try{
-        const headers = {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        // --- INICIALIZACIÓN ---
+        window.onload = function() {
+            logAction('INIT', 'Aplicación iniciada');
+            checkOnboarding();
+            updateDebugInfo();
+            
+            // Chequeo si hay sesión guardada en memoria (opcional, pero buena práctica si refrescan)
+            const savedSession = localStorage.getItem('claraflow_session_id');
+            if(savedSession) {
+                currentSessionId = savedSession;
+                document.getElementById('decisionArea').classList.remove('hidden');
+                document.getElementById('activeSessionCard').style.display = 'block';
+                logAction('SESSION', 'Sesión recuperada de storage: ' + currentSessionId);
+            }
         };
 
-        const body = {
-          user_id: currentUserId,
-          phase: 'start'
-        };
-
-        const data = await postJson(SESSION_URL, headers, body);
-        const sid = extractSessionId(data);
-
-        if(!sid){
-          throw new Error('Respuesta sin session_id (o equivalente). Revisa el log de respuesta en consola.');
+        // --- LOGS Y UTILIDADES ---
+        function logAction(action, desc) {
+            console.log(`[${action}] ${desc}`);
         }
 
-        currentSessionId = sid;
-        log('[SESSION] Created session_id:', currentSessionId);
-
-        updateDashboardKV();
-        setStatus('ok','Sesión creada');
-        showToast('Sesión creada');
-
-        showView('clarification');
-
-      }catch(err){
-        log('[SESSION] Failed:', err);
-        setStatus('bad','Error creando sesión');
-        showToast('Error: ' + safeText(err.message), 4200);
-      }finally{
-        btnCreateSession.disabled = false;
-        updateDashboardKV();
-      }
-    }
-
-    /* ===========================
-       Decision registration
-    =========================== */
-    async function handleMakeDecision(){
-      log('[ACTION] makeDecision clicked');
-
-      if(!currentSessionId){
-        showToast('Primero crea una sesión.');
-        return;
-      }
-
-      setStatus('warn','Registrando decisión...');
-      decisionStatus.textContent = '';
-      btnMakeDecision.disabled = true;
-
-      try{
-        const headers = {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-        };
-
-        // FIX 2: user_id requerido (explicitado)
-        const body = {
-          user_id: currentUserId,
-          session_id: currentSessionId,
-          decision_text: 'Decisión de prueba ClaraFlow',
-          context: { source: 'web_ui' }
-        };
-
-        await postJson(DECIDE_URL, headers, body);
-
-        decisionStatus.textContent = '✅ Decisión registrada!';
-        setStatus('ok','Decisión registrada');
-        showToast('✅ Decisión registrada!');
-
-      }catch(err){
-        log('[DECIDE] Failed:', err);
-        decisionStatus.textContent = '⚠️ Error al registrar la decisión.';
-        setStatus('bad','Error registrando decisión');
-        showToast('Error: ' + safeText(err.message), 4200);
-      }finally{
-        btnMakeDecision.disabled = !currentSessionId;
-        updateDashboardKV();
-      }
-    }
-
-    /* ===========================
-       Chat rendering
-    =========================== */
-    function appendMessage(role, text){
-      const msg = document.createElement('div');
-      msg.className = 'msg ' + role;
-
-      const avatar = document.createElement('div');
-      avatar.className = 'avatar';
-      if(role === 'user') avatar.textContent = 'Tú';
-      else if(role === 'bot') avatar.textContent = 'Clara';
-      else avatar.textContent = '•';
-
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.textContent = safeText(text);
-
-      msg.appendChild(avatar);
-      msg.appendChild(bubble);
-
-      ifChat.appendChild(msg);
-      ifChat.scrollTop = ifChat.scrollHeight;
-    }
-
-    function ensureChatVisible(){
-      ifChat.style.display = 'block';
-      updateDashboardKV();
-    }
-
-    /* ===========================
-       IF Loop backend call
-    =========================== */
-    async function sendIfMessage(text){
-      log('[IF] send message:', text);
-
-      if(!currentSessionId){
-        throw new Error('No hay sesión activa. Crea una sesión primero.');
-      }
-
-      const headers = { 'Content-Type': 'application/json' };
-
-      // FIX 2: user_id requerido (explicitado)
-      const body = {
-        user_id: currentUserId,
-        session_id: currentSessionId,
-        text: text
-      };
-
-      const data = await postJson(IF_URL, headers, body);
-
-      const reply = (data && typeof data.reply === 'string') ? data.reply : '';
-      if(!reply){
-        log('[IF] Missing reply field:', data);
-        throw new Error('Respuesta sin campo "reply". Revisa el log de respuesta en consola.');
-      }
-
-      return reply;
-    }
-
-    /* ===========================
-       Clarification first message flow
-    =========================== */
-    async function handleClarificationSend(){
-      log('[ACTION] ifSendBtn clicked');
-
-      const text = safeText(ifInput.value).trim();
-      if(!text){
-        showToast('Escribe un mensaje primero.');
-        return;
-      }
-      ifInput.value = '';
-
-      if(!currentSessionId){
-        showToast('Primero crea una sesión en el dashboard.');
-        setStatus('warn','Falta sesión');
-        return;
-      }
-
-      try{
-        setStatus('warn','Enviando...');
-
-        if(isFirstMessage){
-          log('[FLOW] First message -> switch to chat');
-          showView('chat');
-          ensureChatVisible();
-
-          appendMessage('system','Cuando quieras, dime qué es eso que ahora mismo te gustaría aclarar.');
-          appendMessage('user', text);
-
-          isFirstMessage = false;
-          updateDashboardKV();
-        }else{
-          showView('chat');
-          ensureChatVisible();
-          appendMessage('user', text);
+        function updateDebugInfo() {
+            const onbStatus = localStorage.getItem('claraflow_onboarding_complete');
+            document.getElementById('dispUserId').innerText = currentUserId.substring(0, 15) + '...';
+            document.getElementById('dispSessionId').innerText = currentSessionId ? currentSessionId.substring(0, 8) + '...' : 'Ninguna';
+            document.getElementById('dispOnboarding').innerText = onbStatus === 'true' ? 'Completado' : 'Pendiente';
+            
+            document.getElementById('debugFooter').innerText = `Debug: Onboarding=${onbStatus} | FirstMsg=${isFirstMessage}`;
+            
+            // Actualizar status bar
+            const statusEl = document.getElementById('statusIndicator');
+            statusEl.innerText = currentSessionId ? 'Session Active' : 'Idle';
+            statusEl.style.background = currentSessionId ? '#48bb78' : 'rgba(0,0,0,0.2)';
         }
 
-        const reply = await sendIfMessage(text);
-        appendMessage('bot', reply);
-
-        setStatus('ok','Respuesta recibida');
-
-      }catch(err){
-        log('[FLOW] handleClarificationSend error:', err);
-        appendMessage('system','⚠️ Error: ' + safeText(err.message));
-        setStatus('bad','Error enviando');
-        showToast('Error: ' + safeText(err.message), 4200);
-      }
-    }
-
-    /* ===========================
-       Chat send flow
-    =========================== */
-    async function handleChatSend(){
-      log('[ACTION] chatSendBtn clicked');
-
-      const text = safeText(chatInput.value).trim();
-      if(!text){
-        showToast('Escribe un mensaje primero.');
-        return;
-      }
-      chatInput.value = '';
-
-      if(!currentSessionId){
-        showToast('Primero crea una sesión en el dashboard.');
-        setStatus('warn','Falta sesión');
-        return;
-      }
-
-      try{
-        setStatus('warn','Enviando...');
-        ensureChatVisible();
-
-        appendMessage('user', text);
-
-        const reply = await sendIfMessage(text);
-        appendMessage('bot', reply);
-
-        setStatus('ok','Respuesta recibida');
-        updateDashboardKV();
-
-      }catch(err){
-        log('[CHAT] handleChatSend error:', err);
-        appendMessage('system','⚠️ Error: ' + safeText(err.message));
-        setStatus('bad','Error enviando');
-        showToast('Error: ' + safeText(err.message), 4200);
-      }
-    }
-
-    /* ===========================
-       Keyboard helper
-    =========================== */
-    function bindEnterToSend(inputEl, buttonEl, label){
-      inputEl.addEventListener('keydown', function(ev){
-        if(ev.key === 'Enter'){
-          ev.preventDefault();
-          log('[KEY] Enter pressed in', label);
-          buttonEl.click();
+        function showView(viewId) {
+            // Ocultar todas las vistas
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+            // Mostrar la deseada
+            document.getElementById(viewId).classList.add('active');
+            logAction('NAV', 'Navegando a ' + viewId);
         }
-      });
-    }
 
-    /* ===========================
-       Direct event listeners
-    =========================== */
-    function bindEvents(){
-      log('[INIT] Binding events (direct listeners)');
-
-      btnContinuar.addEventListener('click', function(){
-        log('[BTN] btn-continuar');
-        renderOnboardingStep(2);
-      });
-
-      btnSiguiente.addEventListener('click', function(){
-        log('[BTN] btn-siguiente');
-        renderOnboardingStep(3);
-      });
-
-      btnEntendido.addEventListener('click', function(){
-        log('[BTN] btn-entendido');
-        renderOnboardingStep(4);
-      });
-
-      btnComenzar.addEventListener('click', function(){
-        log('[BTN] btn-comenzar');
-        setOnboardingComplete();
-        setStatus('ok','Onboarding completo');
-        showToast('Onboarding completado');
-        showView('dashboard');
-      });
-
-      btnCreateSession.addEventListener('click', function(){
-        handleCreateSession();
-      });
-
-      btnMakeDecision.addEventListener('click', function(){
-        handleMakeDecision();
-      });
-
-      btnResetApp.addEventListener('click', function(){
-        resetLocal();
-      });
-
-      goToClarification.addEventListener('click', function(){
-        log('[BTN] goToClarification');
-        if(!currentSessionId){
-          showToast('Primero crea una sesión.');
-          return;
+        function handleEnter(e) {
+            if(e.key === 'Enter') sendChatMessage();
         }
-        showView('clarification');
-      });
 
-      goToChat.addEventListener('click', function(){
-        log('[BTN] goToChat');
-        if(isFirstMessage){
-          showToast('El chat se habilita tras el primer mensaje.');
-          return;
+        // --- LÓGICA ONBOARDING ---
+        function checkOnboarding() {
+            const complete = localStorage.getItem('claraflow_onboarding_complete');
+            if (complete === 'true') {
+                showView('viewDashboard');
+            } else {
+                showView('viewOnboarding');
+            }
         }
-        showView('chat');
-        ensureChatVisible();
-      });
 
-      ifSendBtn.addEventListener('click', function(){
-        handleClarificationSend();
-      });
-
-      chatSendBtn.addEventListener('click', function(){
-        handleChatSend();
-      });
-
-      backToDashboard.addEventListener('click', function(){
-        log('[BTN] backToDashboard');
-        showView('dashboard');
-      });
-
-      backToClarification.addEventListener('click', function(){
-        log('[BTN] backToClarification');
-        if(!currentSessionId){
-          showToast('Primero crea una sesión.');
-          showView('dashboard');
-          return;
+        function nextStep(stepNum) {
+            document.querySelectorAll('.onboarding-step').forEach(el => el.classList.remove('active-step'));
+            document.getElementById('step' + stepNum).classList.add('active-step');
         }
-        showView('clarification');
-      });
 
-      bindEnterToSend(ifInput, ifSendBtn, 'ifInput');
-      bindEnterToSend(chatInput, chatSendBtn, 'chatInput');
-    }
+        function finishOnboarding() {
+            localStorage.setItem('claraflow_onboarding_complete', 'true');
+            logAction('ONBOARDING', 'Completado');
+            updateDebugInfo();
+            showView('viewDashboard');
+        }
 
-    /* ===========================
-       DOM initialization
-    =========================== */
-    function cacheDom(){
-      viewOnboarding    = document.getElementById('viewOnboarding');
-      viewDashboard     = document.getElementById('viewDashboard');
-      viewClarification = document.getElementById('viewClarification');
-      viewChat          = document.getElementById('viewChat');
+        // --- LÓGICA DASHBOARD ---
+        function resetLocal() {
+            localStorage.clear();
+            location.reload();
+        }
 
-      obTitle = document.getElementById('obTitle');
-      obBody  = document.getElementById('obBody');
-      obStep  = document.getElementById('obStep');
+        async function startSession() {
+            const btn = document.querySelector('#viewDashboard .btn-primary');
+            btn.innerHTML = "Creando sesión...";
+            btn.disabled = true;
 
-      btnContinuar = document.getElementById('btn-continuar');
-      btnSiguiente = document.getElementById('btn-siguiente');
-      btnEntendido = document.getElementById('btn-entendido');
-      btnComenzar  = document.getElementById('btn-comenzar');
+            try {
+                const response = await fetch(SESSION_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUserId,
+                        phase: "start"
+                    })
+                });
 
-      btnCreateSession = document.getElementById('createSession');
-      btnMakeDecision  = document.getElementById('makeDecision');
-      btnResetApp      = document.getElementById('resetApp');
-      decisionStatus   = document.getElementById('decisionStatus');
-      goToClarification= document.getElementById('goToClarification');
-      goToChat         = document.getElementById('goToChat');
+                if (!response.ok) throw new Error('Error en API Session');
+                
+                const data = await response.json();
+                
+                // Asumimos que la respuesta trae el session_id. 
+                // Ajustar según la estructura real de respuesta si es necesario.
+                // Generalmente: { session_id: "...", ... } o data es el string.
+                // Como no especificaste la estructura de respuesta, asumo data.session_id o data directo.
+                currentSessionId = data.session_id || data.id || (typeof data === 'string' ? data : null);
+                
+                if (!currentSessionId) {
+                    console.warn("No se encontró session_id obvio, usando fallback o logueando data entera:", data);
+                    // Fallback para demo si la API no devuelve exactamente session_id en root
+                    if (data.data && data.data.session_id) currentSessionId = data.data.session_id;
+                }
 
-      kvUserId     = document.getElementById('kvUserId');
-      kvSessionId  = document.getElementById('kvSessionId');
-      kvOnboarding = document.getElementById('kvOnboarding');
+                if(currentSessionId) {
+                    localStorage.setItem('claraflow_session_id', currentSessionId);
+                    logAction('API', 'Sesión creada: ' + currentSessionId);
+                    updateDebugInfo();
+                    
+                    document.getElementById('activeSessionCard').style.display = 'block';
+                    document.getElementById('decisionArea').classList.remove('hidden');
+                    
+                    showView('viewClarification');
+                } else {
+                    throw new Error('No se recibió Session ID válido');
+                }
 
-      ifInput   = document.getElementById('ifInput');
-      ifSendBtn = document.getElementById('ifSendBtn');
+            } catch (error) {
+                console.error(error);
+                alert("Error al crear sesión: " + error.message);
+            } finally {
+                btn.innerHTML = "Iniciar Sesión de Trabajo";
+                btn.disabled = false;
+            }
+        }
 
-      ifChat      = document.getElementById('ifChat');
-      chatInput   = document.getElementById('chatInput');
-      chatSendBtn = document.getElementById('chatSendBtn');
+        async function registerDecision() {
+            if (!currentSessionId) return;
+            const text = document.getElementById('decisionText').value;
+            if(!text) return alert("Escribe una decisión.");
 
-      backToDashboard     = document.getElementById('backToDashboard');
-      backToClarification = document.getElementById('backToClarification');
+            try {
+                const response = await fetch(DECIDE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUserId,
+                        session_id: currentSessionId,
+                        decision_text: text,
+                        context: "Web Client Decision"
+                    })
+                });
+                
+                if(response.ok) {
+                    alert("Decisión registrada correctamente.");
+                    document.getElementById('decisionText').value = "";
+                } else {
+                    throw new Error('Error al registrar decisión');
+                }
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        }
 
-      statusDot  = document.getElementById('statusDot');
-      statusText = document.getElementById('statusText');
-      userCode   = document.getElementById('userCode');
-      sessionCode= document.getElementById('sessionCode');
+        // --- LÓGICA CLARIFICACIÓN & CHAT ---
+        
+        // Maneja el paso de Vista 3 a Vista 4 (Primer mensaje)
+        async function handleFirstMessage() {
+            const input = document.getElementById('clarificationInput');
+            const text = input.value.trim();
+            
+            if (!text) return alert("Por favor escribe algo para comenzar.");
+            if (!currentSessionId) return alert("Error de sesión: No hay ID de sesión activo.");
 
-      footerOnboarding = document.getElementById('footerOnboarding');
-      footerFirstMsg   = document.getElementById('footerFirstMsg');
+            // 1. Navegar a VISTA 4
+            showView('viewChat');
+            
+            // 2. Crear div de chat (limpiar anterior si existe)
+            const chatHistory = document.getElementById('chatHistory');
+            chatHistory.innerHTML = ''; // Limpiar historial visual previo
 
-      toastEl = document.getElementById('toast');
+            // 3. Agregar mensaje del sistema
+            addBubble('system', "Cuando quieras, dime qué es eso que ahora mismo te gustaría aclarar.");
 
-      const required = [
-        viewOnboarding, viewDashboard, viewClarification, viewChat,
-        btnContinuar, btnSiguiente, btnEntendido, btnComenzar,
-        btnCreateSession, btnMakeDecision, btnResetApp,
-        ifInput, ifSendBtn, ifChat, chatInput, chatSendBtn
-      ];
-      for(let i=0;i<required.length;i++){
-        if(!required[i]) console.error('[INIT] Missing required DOM element at index', i);
-      }
-    }
+            // 4. Agregar mensaje del usuario (visual)
+            addBubble('user', text);
+            input.value = ''; // Limpiar input de clarificación
 
-    /* ===========================
-       App startup
-    =========================== */
-    function initApp(){
-      log('[INIT] ClaraFlow boot (CORREGIDO)');
-      cacheDom();
-      bindEvents();
+            // 5. POST a IF_URL
+            await postToIfLoop(text);
+            
+            // 7. Marcar flag
+            isFirstMessage = false;
+            updateDebugInfo();
+        }
 
-      setStatus('ok','Listo');
-      updateHeaderCodes();
-      updateDashboardKV();
+        // Envío de mensajes desde la Vista 4 (Chat continuo)
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            addBubble('user', text);
+            input.value = '';
+            
+            await postToIfLoop(text);
+        }
 
-      // Onboarding route
-      if(isOnboardingComplete()){
-        log('[INIT] Onboarding complete -> dashboard');
-        showView('dashboard');
-      }else{
-        log('[INIT] Onboarding not complete -> onboarding');
-        showView('onboarding');
-        renderOnboardingStep(1);
-      }
+        // Función centralizada para llamar a la API IF Loop
+        async function postToIfLoop(text) {
+            // Indicador de carga visual (opcional, pero útil)
+            const loadingId = addBubble('system', 'Clara está pensando...', true);
 
-      // Requirement: chat hidden initially
-      ifChat.style.display = 'none';
+            try {
+                const response = await fetch(IF_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUserId,
+                        session_id: currentSessionId,
+                        text: text
+                    })
+                });
 
-      log('[INIT] Ready');
-    }
+                // Remover loading
+                const loadingEl = document.getElementById(loadingId);
+                if(loadingEl) loadingEl.remove();
 
-    if(document.readyState === 'loading'){
-      document.addEventListener('DOMContentLoaded', function(){ initApp(); });
-    }else{
-      initApp();
-    }
-  </script>
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                
+                const data = await response.json();
+                
+                // Asumiendo que la respuesta es texto plano o un JSON con campo 'message' o 'reply'
+                // Ajustar según respuesta real. Usaremos JSON.stringify si es objeto complejo para debug.
+                let replyText = "Respuesta vacía";
+                if (typeof data === 'string') replyText = data;
+                else if (data.message) replyText = data.message;
+                else if (data.reply) replyText = data.reply;
+                else if (data.text) replyText = data.text;
+                else replyText = JSON.stringify(data); // Fallback
+
+                addBubble('bot', replyText);
+
+            } catch (error) {
+                const loadingEl = document.getElementById(loadingId);
+                if(loadingEl) loadingEl.remove();
+                
+                console.error(error);
+                addBubble('error', 'Error de conexión: ' + error.message);
+            }
+        }
+
+        // Helper para crear burbujas de chat
+        function addBubble(type, text, isTemp = false) {
+            const history = document.getElementById('chatHistory');
+            const div = document.createElement('div');
+            
+            div.classList.add('msg');
+            
+            if (type === 'user') div.classList.add('msg-user');
+            else if (type === 'bot') div.classList.add('msg-bot');
+            else if (type === 'system') div.classList.add('msg-system');
+            else if (type === 'error') div.classList.add('msg-error');
+            
+            div.innerText = text;
+            
+            const id = 'msg-' + Date.now() + Math.random();
+            div.id = id;
+            
+            history.appendChild(div);
+            history.scrollTop = history.scrollHeight;
+            
+            return id;
+        }
+
+    </script>
 </body>
 </html>
