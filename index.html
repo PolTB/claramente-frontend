@@ -310,7 +310,6 @@
         const SESSION_URL = 'https://claramente-edge-prod.vercel.app/api/clara-flow-session';
         const IF_URL = 'https://claramente-edge-prod.vercel.app/api/if-loop-message';
         const DECIDE_URL = 'https://claramente-edge-prod.vercel.app/api/claraflow-decide';
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRramVwc3FncXRqbWlieGdhaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4MDU4NDcsImV4cCI6MjA1MzM4MTg0N30.YH0RfmwXc3FncXRQqbHlidGdhX1pEzNTI3NzcyNy1jYzE2LTQ0YjgtYmZjMi1iZTEzMDg3N2Y3ZmE";
 
         // --- VARIABLES GLOBALES ---
         let currentSessionId = null;
@@ -407,8 +406,6 @@
                     referrerPolicy: 'no-referrer', // Evitar bloqueo por referrer
                     headers: {
                         'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
                     },
                     body: JSON.stringify({
                         user_id: currentUserId,
@@ -466,12 +463,8 @@
                     referrerPolicy: 'no-referrer',
                     headers: {
                         'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
                     },
                     body: JSON.stringify({
-                        user_id: currentUserId,
-                        session_id: currentSessionId,
                         decision_text: text,
                         context: "Web Client Decision"
                     })
@@ -534,12 +527,8 @@
                     referrerPolicy: 'no-referrer',
                     headers: {
                         'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
                     },
                     body: JSON.stringify({
-                        user_id: currentUserId,
-                        session_id: currentSessionId,
                         text: text
                     })
                 });
